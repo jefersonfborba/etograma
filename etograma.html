@@ -704,9 +704,9 @@ table.tab .cel-t {
   font-size: var(--fs-sm);
   font-weight: var(--fw-black);
   cursor: pointer;
-  /* Área de toque 44px sem crescer visualmente */
-  padding: 11px;
-  margin: -11px;
+  /* Expandir área de toque verticalmente sem sobrepor botões adjacentes */
+  padding: 11px 14px;
+  margin: -11px -14px;
   position: relative;
 }
 .sec-btn.add { background: var(--bg-primary); color: var(--text-inverse); }
@@ -827,14 +827,17 @@ table.tab .cel-t {
   color: var(--text-inverse);
   cursor: pointer;
   flex-shrink: 0;
-  padding: 0;
+  /* Expandir área de toque para ~32px sem crescer visualmente */
+  padding: 9px;
+  margin: -9px;
+  position: relative;
 }
 
 /* ─── BOTTOM SHEET — edição de comportamento ─────────────────── */
 .sheet-overlay {
   position: fixed; inset: 0;
   background: rgba(0,0,0,.45);
-  z-index: 100;
+  z-index: 110; /* acima de .modal-overlay (100) */
   display: none;
   align-items: flex-end;
   justify-content: center;
