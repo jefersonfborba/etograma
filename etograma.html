@@ -2249,6 +2249,68 @@ document.getElementById("btnImpAnimais").onclick=()=>{
   document.getElementById("fileAnimais").click();
 };
 
+/* ---------- Bottom sheet — edição de comportamento ---------- */
+let _sheetIdx = null; // índice do comp sendo editado
+
+function abrirSheet(idx){
+  _sheetIdx = idx;
+  const c = comps[idx];
+  document.getElementById("sheet-emoji-box").textContent = c.ico;
+  document.getElementById("sheet-ico-hidden").value = c.ico;
+  document.getElementById("sheet-nome").value = c.nome;
+  sheetSetTipo(c.dur ? "dur" : "inst");
+  sheetSetSocial(!!c.social);
+  document.getElementById("sheet-overlay").classList.add("open");
+  setTimeout(()=>document.getElementById("sheet-nome").focus(), 220);
+}
+
+function fecharSheet(){
+  document.getElementById("sheet-overlay").classList.remove("open");
+  _sheetIdx = null;
+}
+
+function salvarSheet(){
+  if(_sheetIdx === null) return;
+  const ico  = document.getElementById("sheet-ico-hidden").value.trim() || "⭐";
+  const nome = document.getElementById("sheet-nome").value.trim() || "Comportamento";
+  const dur  = document.getElementById("tipo-dur").classList.contains("ativo");
+  const social = document.getElementById("sheet-social-toggle").classList.contains("on");
+  comps[_sheetIdx] = { ...comps[_sheetIdx], ico, nome, dur, social };
+  persistirComps();
+  renderCompCfg();
+  renderGrade();
+  fecharSheet();
+}
+
+function sheetSetTipo(tipo){
+  document.getElementById("tipo-inst").classList.toggle("ativo", tipo === "inst");
+  document.getElementById("tipo-dur").classList.toggle("ativo",  tipo === "dur");
+}
+
+function sheetSetSocial(on){
+  document.getElementById("sheet-social-toggle").classList.toggle("on", on);
+}
+
+function sheetToggleSocial(){
+  const t = document.getElementById("sheet-social-toggle");
+  t.classList.toggle("on");
+}
+
+/* Fechar tocando no fundo */
+document.getElementById("sheet-overlay").addEventListener("click", e=>{
+  if(e.target === document.getElementById("sheet-overlay")) fecharSheet();
+});
+
+/* Emoji — toque abre picker nativo */
+document.getElementById("sheet-emoji-box").addEventListener("click", ()=>{
+  const inp = document.getElementById("sheet-ico-hidden");
+  inp.focus();
+});
+document.getElementById("sheet-ico-hidden").addEventListener("input", e=>{
+  const v = e.target.value.trim();
+  if(v) document.getElementById("sheet-emoji-box").textContent = v;
+});
+
 /* ---------- Cadastro de comportamentos ---------- */
 /* ── Drag-to-reorder state ── */
 let _tdCard=null,_tdIdx=null,_tdClone=null,_tdTimer=null,_ddIdx=null;
