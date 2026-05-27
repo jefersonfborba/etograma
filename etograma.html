@@ -352,17 +352,21 @@ main { flex: 1; padding: var(--sp-4); }
 
 /* Faixa da ação de áudio */
 .action-strip {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
   padding: var(--sp-3) var(--sp-4) var(--sp-2);
+  justify-content: flex-end; /* btn-inicio à direita quando gravar está oculto */
 }
 .btn-rec {
-  width: 100%;
-  min-height: var(--touch-field);      /* era sem min-height */
+  flex: 1;                             /* ocupa espaço disponível, sem forçar 100% */
+  min-height: var(--touch-field);
   border: none;
   border-radius: var(--r-lg);
   background: var(--bg-primary-dk);
   color: var(--text-inverse);
   font-weight: var(--fw-black);
-  font-size: var(--fs-sm);             /* era .98rem */
+  font-size: var(--fs-sm);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -769,13 +773,14 @@ table.tab .cel-t {
 .modal-btns .btn-ok     { background: var(--bg-danger); color: #fff; }
 
 /* ─── HOME SCREEN ────────────────────────────────────────── */
+/* ATENÇÃO: não usar display: aqui — ID selector sobrescreve .painel { display: none } */
 #painel-home {
-  display: flex;
   flex-direction: column;
   justify-content: center;
   padding: 0;
   min-height: calc(100dvh - 140px); /* full height menos header */
 }
+#painel-home.ativo { display: flex; }
 .home-topo {
   text-align: center;
   padding: var(--sp-8) var(--sp-4) var(--sp-4);
@@ -816,9 +821,15 @@ table.tab .cel-t {
 body.em-home .nav-bar { display: none; }
 .tab-strip { display: none; } /* navegação via home screen */
 
+/* Gravar áudio: visível APENAS na tela Registrar */
+#btnRec { display: none; }
+body.em-registrar #btnRec { display: flex; }
+
 /* Animais bar: visível APENAS na tela Registrar */
 .animais-bar { display: none; }
 body.em-registrar .animais-bar { display: flex; }
+
+/* btn-inicio: alinhado à direita quando é o único visível — definido em .action-strip */
 
 /* Botão "Início" na action-strip (visível em seções) */
 .btn-inicio {
