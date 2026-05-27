@@ -1018,138 +1018,12 @@ table.tab .cel-t {
   padding: var(--sp-2);
   font-size: var(--fs-sm);             /* era .95rem */
 }
-.cfg-item input.ico-in {
-  width: 54px;
-  text-align: center;
-  font-size: var(--fs-lg);             /* era 1.4rem */
-}
 .cfg-item input.nome-in    { flex: 1; font-weight: var(--fw-bold); }
-.cfg-item .tipo-sel {
-  border: 1px solid var(--border-default);
-  border-radius: var(--r-sm);
-  padding: var(--sp-2) var(--sp-1);
-  font-size: var(--fs-xs);             /* era .85rem */
-  font-weight: var(--fw-bold);
-  background: var(--bg-surface);
-  flex: 0 0 auto;
-  max-width: 135px;
-}
-.cfg-item input.brinco-in  { flex: 1; font-weight: var(--fw-black); font-size: var(--fs-sm); }
 
-/* ─── CARD DE COMPORTAMENTO (cfg) ───────────────────────────── */
-.comp-card {
-  background: var(--bg-surface);
-  border-radius: var(--r-md);
-  padding: var(--sp-3) var(--sp-3) var(--sp-2);
-  margin-bottom: var(--sp-3);
-  box-shadow: var(--shadow-sm);
-  border: 1.5px solid var(--border-light);
-  /* Evita seleção de texto ao iniciar drag no mobile */
-  user-select: none;
-  -webkit-user-select: none;
-  -webkit-touch-callout: none;
-}
-.comp-card.dragging { opacity: 0.35; box-shadow: none; }
-.comp-card.drag-over { border-color: var(--bg-accent); box-shadow: 0 0 0 2px var(--bg-accent-lt); }
-.comp-card-header {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-2);
-  margin-bottom: var(--sp-2);
-}
-.drag-handle {
-  color: var(--text-muted);
-  font-size: 1.3rem;
-  cursor: grab;
-  padding: 0 var(--sp-1);
-  line-height: 1;
-  flex: 0 0 auto;
-  touch-action: none;
-}
-.drag-handle:active { cursor: grabbing; color: var(--text-secondary); }
-.comp-card-footer {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-3);
-  flex-wrap: wrap;
-}
-.btn-del-comp {
-  background: var(--bg-danger);
-  color: #fff;
-  border: none;
-  border-radius: var(--r-sm);
-  width: 44px; height: 44px;   /* era 38×38 — alinhado à altura dos inputs */
-  font-size: var(--fs-xs);
-  cursor: pointer;
-  flex: 0 0 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-left: auto;
-}
-.drag-ghost {
-  opacity: 0.88;
-  box-shadow: var(--shadow-md);
-  pointer-events: none;
-  border-radius: var(--r-md);
-}
 
-/* ─── COMP-CARD INPUTS ───────────────────────────────────────── */
-/* Os seletores .cfg-item input.* não alcançam os inputs dentro   */
-/* do .comp-card-header — estes precisam de regras próprias.      */
-.comp-card-header input {
-  border: 1px solid var(--border-default);
-  border-radius: var(--r-sm);
-  padding: 0 var(--sp-2);
-  font-size: var(--fs-sm);
-  height: 44px;
-  background: var(--bg-surface);
-}
-.comp-card-header input.ico-in {
-  width: 52px;
-  flex: 0 0 52px;
-  text-align: center;
-  font-size: var(--fs-lg);   /* emoji legível no campo */
-  padding: 0;
-}
-.comp-card-header input.nome-in {
-  flex: 1;
-  min-width: 0;              /* evita overflow em flex */
-  font-weight: var(--fw-bold);
-  padding: 0 var(--sp-2);
-}
-.comp-card-footer .tipo-sel {
-  border: 1px solid var(--border-default);
-  border-radius: var(--r-sm);
-  padding: var(--sp-2) var(--sp-1);
-  font-size: var(--fs-xs);
-  font-weight: var(--fw-bold);
-  background: var(--bg-surface);
-  flex: 0 0 auto;
-  min-height: var(--touch-min);
-  max-width: 155px;
-}
 
 /* ─── COMPORTAMENTOS SOCIAIS (v3) ─────────────────────────── */
 /* Badge 👥 agora em .flag-soc dentro de .btn-flags (esquerda) */
-/* Toggle social no cfg */
-.social-toggle {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-1);
-  font-size: var(--fs-xs);
-  font-weight: var(--fw-bold);
-  color: var(--text-hint);
-  cursor: pointer;
-  user-select: none;
-  white-space: nowrap;
-}
-.social-toggle input[type=checkbox] {
-  width: 17px; height: 17px;
-  cursor: pointer;
-  accent-color: var(--bg-primary);
-}
-.social-toggle.ativo { color: var(--bg-primary); }
 /* Modal de seleção do animal alvo */
 .alvo-titulo {
   font-weight: var(--fw-black);
@@ -1184,43 +1058,6 @@ table.tab .cel-t {
   font-weight: var(--fw-black);
 }
 #modal-alvo-salvar:disabled { opacity: 0.35; pointer-events: none; }
-.cfg-item button {
-  background: var(--bg-danger);
-  color: #fff;
-  border: none;
-  border-radius: var(--r-sm);
-  width: 40px; height: 40px;
-  font-size: var(--fs-md);
-  cursor: pointer;
-  flex: 0 0 auto;
-}
-.add-btn {
-  width: 100%;
-  background: var(--bg-primary);
-  color: #fff;
-  border: none;
-  border-radius: var(--r-md);
-  padding: var(--sp-4);
-  font-weight: var(--fw-black);
-  font-size: var(--fs-xs);             /* era .95rem */
-  cursor: pointer;
-  margin-top: var(--sp-1);
-  min-height: var(--touch-field);
-}
-.import-btn {
-  width: 100%;
-  background: transparent;
-  border: 2px dashed var(--border-default);
-  border-radius: var(--r-md);
-  padding: var(--sp-3) var(--sp-4);
-  font-weight: var(--fw-bold);
-  font-size: var(--fs-xs);
-  color: var(--text-hint);
-  cursor: pointer;
-  margin-top: var(--sp-2);
-  min-height: var(--touch-min);
-}
-.import-btn:active { background: var(--c-earth-100); border-color: var(--bg-accent); }
 
 /* Modal de importação — 3 ações */
 #modal-import .modal-btns { flex-direction: column; }
@@ -1239,14 +1076,6 @@ table.tab .cel-t {
   white-space: nowrap;
 }
 .link-modelo:active { opacity: .7; }
-.sec-tit {
-  font-weight: var(--fw-black);
-  font-size: var(--fs-xs);             /* era .78rem */
-  text-transform: uppercase;
-  letter-spacing: .6px;
-  color: var(--bg-primary);
-  margin: 18px 0 var(--sp-2);
-}
 
 /* ─── TOAST ──────────────────────────────────────────────── */
 #toast {
