@@ -2204,6 +2204,14 @@ async function recarregarContadores(){
   renderGrade();
 }
 
+/* ---------- Badges de contagem das seções cfg ---------- */
+function atualizarBadgesCfg(){
+  const ba=document.getElementById("badge-animais");
+  const bc=document.getElementById("badge-comps");
+  if(ba)ba.textContent=animais.length;
+  if(bc)bc.textContent=comps.length;
+}
+
 /* ---------- Cadastro de animais ---------- */
 function renderAnimaisCfg(){
   const cont=document.getElementById("animaisLista");cont.innerHTML="";
@@ -2231,10 +2239,14 @@ async function persistirAnimais(){
   await salvarConfig("animais",animais);
   await salvarConfig("animalAtivo",animalAtivo);
   renderAnimaisBar();renderFiltro();await recarregarContadores();
+  atualizarBadgesCfg();
 }
-document.getElementById("addAnimal").onclick=()=>{
+document.getElementById("btnAddAnimal").onclick=()=>{
   let nome="novo",n=2;while(animais.includes(nome))nome="novo-"+n++;
   animais.push(nome);persistirAnimais();renderAnimaisCfg();
+};
+document.getElementById("btnImpAnimais").onclick=()=>{
+  document.getElementById("fileAnimais").click();
 };
 
 /* ---------- Cadastro de comportamentos ---------- */
@@ -2353,8 +2365,15 @@ function renderCompCfg(){
     cont.appendChild(card);
   });
 }
-async function persistirComps(){await salvarConfig("comps",comps);await recarregarContadores();}
-document.getElementById("addComp").onclick=()=>{comps.push({ico:"⭐",nome:"Novo",dur:false});persistirComps();renderCompCfg();};
+async function persistirComps(){await salvarConfig("comps",comps);await recarregarContadores();atualizarBadgesCfg();}
+document.getElementById("btnAddComp").onclick=()=>{
+  comps.push({ico:"⭐",nome:"Novo",dur:false,social:false});
+  persistirComps();renderCompCfg();
+  abrirSheet(comps.length-1); /* abre sheet para o novo item imediatamente */
+};
+document.getElementById("btnImpComps").onclick=()=>{
+  document.getElementById("fileComps").click();
+};
 document.getElementById("obs-nome").oninput=async e=>{observador=e.target.value;await salvarConfig("observador",observador);};
 
 /* ---------- Importar CSV ---------- */
@@ -2395,7 +2414,6 @@ document.getElementById("modal-import-cancel").onclick=()=>{
 };
 
 // Importar animais
-document.getElementById("importAnimaisBt").onclick=()=>document.getElementById("fileAnimais").click();
 document.getElementById("fileAnimais").onchange=function(){
   const f=this.files[0];if(!f)return;
   const r=new FileReader();
@@ -2419,7 +2437,6 @@ document.getElementById("fileAnimais").onchange=function(){
 };
 
 // Importar comportamentos
-document.getElementById("importCompsBt").onclick=()=>document.getElementById("fileComps").click();
 document.getElementById("fileComps").onchange=function(){
   const f=this.files[0];if(!f)return;
   const r=new FileReader();
@@ -2450,7 +2467,7 @@ function irPara(tab){
   document.body.classList.toggle("em-registrar", tab==="registrar");
   if(tab==="lista"){renderFiltro();renderLista();}
   if(tab==="resumo")renderResumo();
-  if(tab==="cfg"){document.getElementById("obs-nome").value=observador;renderAnimaisCfg();renderCompCfg();}
+  if(tab==="cfg"){document.getElementById("obs-nome").value=observador;renderAnimaisCfg();renderCompCfg();atualizarBadgesCfg();}
 }
 
 // Cards da home screen
