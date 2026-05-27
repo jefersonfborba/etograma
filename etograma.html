@@ -719,6 +719,13 @@ table.tab .cel-t {
   margin: 2px 0 var(--sp-4);
   line-height: var(--lh-base);
 }
+.link-modelo {
+  color: var(--bg-duration);
+  font-weight: var(--fw-bold);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.link-modelo:active { opacity: .7; }
 .sec-tit {
   font-weight: var(--fw-black);
   font-size: var(--fs-xs);             /* era .78rem */
@@ -931,14 +938,14 @@ body.em-registrar .animais-bar { display: flex; }
     </div>
 
     <div class="sec-tit">🏷️ Animais (brincos)</div>
-    <p class="dica">Cadastre os animais que vai observar. No registro, toque no brinco para selecioná-lo antes do comportamento.</p>
+    <p class="dica">Cadastre os animais que vai observar. No registro, toque no brinco para selecioná-lo antes do comportamento. <a class="link-modelo" href="animais-modelo.csv" download>⬇️ baixar modelo CSV</a></p>
     <div id="animaisLista"></div>
     <button class="add-btn" id="addAnimal">＋ Adicionar animal</button>
     <button class="import-btn" id="importAnimaisBt">📥 Importar CSV de animais</button>
     <input type="file" id="fileAnimais" accept=".csv,text/csv" hidden>
 
     <div class="sec-tit">🐄 Comportamentos</div>
-    <p class="dica">Personalize os botões. Use um emoji no campo do ícone.</p>
+    <p class="dica">Personalize os botões. Use um emoji no campo do ícone. <a class="link-modelo" href="comportamentos-modelo.csv" download>⬇️ baixar modelo CSV</a></p>
     <div id="compLista"></div>
     <button class="add-btn" id="addComp">＋ Adicionar comportamento</button>
     <button class="import-btn" id="importCompsBt">📥 Importar CSV de comportamentos</button>
