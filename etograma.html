@@ -694,6 +694,25 @@ table.tab .cel-t {
   margin-top: var(--sp-1);
   min-height: var(--touch-field);
 }
+.import-btn {
+  width: 100%;
+  background: transparent;
+  border: 2px dashed var(--border-default);
+  border-radius: var(--r-md);
+  padding: var(--sp-3) var(--sp-4);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-xs);
+  color: var(--text-hint);
+  cursor: pointer;
+  margin-top: var(--sp-2);
+  min-height: var(--touch-min);
+}
+.import-btn:active { background: var(--c-earth-100); border-color: var(--bg-accent); }
+
+/* Modal de importação — 3 ações */
+#modal-import .modal-btns { flex-direction: column; }
+#modal-import .btn-subst   { background: var(--bg-danger);      color: #fff; }
+#modal-import .btn-mesclar { background: var(--bg-primary-dk);  color: #fff; }
 .dica {
   font-size: var(--fs-xs);             /* era .8rem */
   color: var(--text-hint);
@@ -915,11 +934,15 @@ body.em-registrar .animais-bar { display: flex; }
     <p class="dica">Cadastre os animais que vai observar. No registro, toque no brinco para selecioná-lo antes do comportamento.</p>
     <div id="animaisLista"></div>
     <button class="add-btn" id="addAnimal">＋ Adicionar animal</button>
+    <button class="import-btn" id="importAnimaisBt">📥 Importar CSV de animais</button>
+    <input type="file" id="fileAnimais" accept=".csv,text/csv" hidden>
 
     <div class="sec-tit">🐄 Comportamentos</div>
     <p class="dica">Personalize os botões. Use um emoji no campo do ícone.</p>
     <div id="compLista"></div>
     <button class="add-btn" id="addComp">＋ Adicionar comportamento</button>
+    <button class="import-btn" id="importCompsBt">📥 Importar CSV de comportamentos</button>
+    <input type="file" id="fileComps" accept=".csv,text/csv" hidden>
   </section>
 </main>
 
@@ -937,6 +960,17 @@ body.em-registrar .animais-bar { display: flex; }
 </nav>
 
 <div id="toast"></div>
+
+<div id="modal-import" class="modal-overlay" hidden>
+  <div class="modal-box">
+    <p id="modal-import-msg" style="white-space:pre-line"></p>
+    <div class="modal-btns" style="flex-direction:column;gap:var(--sp-2)">
+      <button class="btn-ok btn-subst" id="modal-import-subst">🗑️ Substituir tudo</button>
+      <button class="btn-ok btn-mesclar" id="modal-import-mesclar">➕ Mesclar (manter + adicionar)</button>
+      <button class="btn-cancel" id="modal-import-cancel">Cancelar</button>
+    </div>
+  </div>
+</div>
 
 <div id="modal-conf" class="modal-overlay" hidden>
   <div class="modal-box">
@@ -1446,6 +1480,91 @@ function renderCompCfg(){
 async function persistirComps(){await salvarConfig("comps",comps);await recarregarContadores();}
 document.getElementById("addComp").onclick=()=>{comps.push({ico:"⭐",nome:"Novo",dur:false});persistirComps();renderCompCfg();};
 document.getElementById("obs-nome").oninput=async e=>{observador=e.target.value;await salvarConfig("observador",observador);};
+
+/* ---------- Importar CSV ---------- */
+function parseCSVAnimais(txt){
+  return txt.trim().split(/\r?\n/)
+    .map(l=>l.trim().replace(/^["']|["']$/g,""))
+    .filter(v=>v && !/^brinco$/i.test(v));
+}
+function parseCSVComps(txt){
+  const linhas=txt.trim().split(/\r?\n/);
+  const res=[];
+  linhas.forEach((l,i)=>{
+    if(i===0&&/ico|nome/i.test(l))return;
+    const cols=l.split(",").map(c=>c.trim().replace(/^["']|["']$/g,""));
+    if(cols.length<2||!cols[1])return;
+    res.push({ico:cols[0]||"🐄",nome:cols[1],
+      dur:["sim","s","yes","1","true"].includes((cols[2]||"").toLowerCase())});
+  });
+  return res;
+}
+
+let _impCb={subst:null,mesclar:null};
+function abrirModalImport(msg,onSubst,onMesclar){
+  document.getElementById("modal-import-msg").textContent=msg;
+  document.getElementById("modal-import").hidden=false;
+  _impCb={subst:onSubst,mesclar:onMesclar};
+}
+document.getElementById("modal-import-subst").onclick=()=>{
+  document.getElementById("modal-import").hidden=true;
+  _impCb.subst&&_impCb.subst();
+};
+document.getElementById("modal-import-mesclar").onclick=()=>{
+  document.getElementById("modal-import").hidden=true;
+  _impCb.mesclar&&_impCb.mesclar();
+};
+document.getElementById("modal-import-cancel").onclick=()=>{
+  document.getElementById("modal-import").hidden=true;
+};
+
+// Importar animais
+document.getElementById("importAnimaisBt").onclick=()=>document.getElementById("fileAnimais").click();
+document.getElementById("fileAnimais").onchange=function(){
+  const f=this.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=e=>{
+    this.value="";
+    const novos=parseCSVAnimais(e.target.result);
+    if(!novos.length){toast("⚠️ Nenhum animal encontrado no CSV");return;}
+    const dup=novos.filter(n=>animais.includes(n));
+    const msg=`${novos.length} animal(is) encontrado(s) no CSV.`+
+      (dup.length?`\n${dup.length} já existe(m) no dispositivo.`:"")+
+      "\n\nComo deseja proceder?";
+    abrirModalImport(msg,
+      ()=>{animais=[...novos];persistirAnimais();renderAnimaisCfg();
+           toast(`✅ ${novos.length} animais importados (lista substituída)`);},
+      ()=>{const add=novos.filter(n=>!animais.includes(n));
+           animais.push(...add);persistirAnimais();renderAnimaisCfg();
+           toast(`✅ ${add.length} animal(is) adicionado(s)${dup.length?", "+dup.length+" duplicata(s) ignorada(s)":""}`);}
+    );
+  };
+  r.readAsText(f,"utf-8");
+};
+
+// Importar comportamentos
+document.getElementById("importCompsBt").onclick=()=>document.getElementById("fileComps").click();
+document.getElementById("fileComps").onchange=function(){
+  const f=this.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=e=>{
+    this.value="";
+    const novos=parseCSVComps(e.target.result);
+    if(!novos.length){toast("⚠️ Nenhum comportamento encontrado no CSV");return;}
+    const dup=novos.filter(n=>comps.some(c=>c.nome.toLowerCase()===n.nome.toLowerCase()));
+    const msg=`${novos.length} comportamento(s) encontrado(s) no CSV.`+
+      (dup.length?`\n${dup.length} já existe(m) no dispositivo.`:"")+
+      "\n\nComo deseja proceder?";
+    abrirModalImport(msg,
+      ()=>{comps=[...novos];persistirComps();renderCompCfg();
+           toast(`✅ ${novos.length} comportamentos importados (lista substituída)`);},
+      ()=>{const add=novos.filter(n=>!comps.some(c=>c.nome.toLowerCase()===n.nome.toLowerCase()));
+           comps.push(...add);persistirComps();renderCompCfg();
+           toast(`✅ ${add.length} comportamento(s) adicionado(s)${dup.length?", "+dup.length+" duplicata(s) ignorada(s)":""}`);}
+    );
+  };
+  r.readAsText(f,"utf-8");
+};
 
 /* ---------- Navegação — home screen + seções ---------- */
 function irPara(tab){
