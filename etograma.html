@@ -2214,26 +2214,36 @@ function atualizarBadgesCfg(){
 
 /* ---------- Cadastro de animais ---------- */
 function renderAnimaisCfg(){
-  const cont=document.getElementById("animaisLista");cont.innerHTML="";
+  const cont=document.getElementById("animaisLista");
+  cont.innerHTML="";
   animais.forEach((a,i)=>{
-    const div=document.createElement("div");div.className="cfg-item";
-    div.innerHTML=`<input class="brinco-in" value="${a}"><button>✕</button>`;
-    const inp=div.querySelector("input");
-    inp.onchange=()=>{
+    const chip=document.createElement("div");
+    chip.className="chip-cfg";
+    chip.innerHTML=`🏷️ <input class="brinco-in" value="${a}" maxlength="20"><button class="chip-del" title="Remover">✕</button>`;
+    const inp=chip.querySelector("input");
+    /* ajustar largura ao conteúdo */
+    const ajustarLargura=()=>{inp.style.width=Math.max(inp.value.length,4)+"ch";};
+    ajustarLargura();
+    inp.addEventListener("input",ajustarLargura);
+    inp.addEventListener("change",()=>{
       const novo=inp.value.trim();
-      if(!novo){inp.value=animais[i];return;}
-      if(animais.some((a,j)=>j!==i&&a===novo)){toast("⚠️ Identificação já cadastrada");inp.value=animais[i];return;}
+      if(!novo){inp.value=animais[i];ajustarLargura();return;}
+      if(animais.some((x,j)=>j!==i&&x===novo)){
+        toast("⚠️ Identificação já cadastrada");inp.value=animais[i];ajustarLargura();return;
+      }
       const old=animais[i];animais[i]=novo;
       if(animalAtivo===old)animalAtivo=novo;
       persistirAnimais();
-    };
-    div.querySelector("button").onclick=()=>{
+    });
+    chip.querySelector(".chip-del").addEventListener("click",e=>{
+      e.stopPropagation();
       const rem=animais[i];animais.splice(i,1);
       if(animalAtivo===rem)animalAtivo=null;
       persistirAnimais();renderAnimaisCfg();
-    };
-    cont.appendChild(div);
+    });
+    cont.appendChild(chip);
   });
+  atualizarBadgesCfg();
 }
 async function persistirAnimais(){
   await salvarConfig("animais",animais);
