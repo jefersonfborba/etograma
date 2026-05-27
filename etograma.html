@@ -266,7 +266,7 @@ main { flex: 1; padding: var(--sp-4); }
   overflow: hidden;
 }
 .btn-comp .ico {
-  font-size: var(--fs-xl);             /* era 2.6rem */
+  font-size: 3.2rem;                   /* era 2.5rem — mais visível em campo */
   line-height: 1;
 }
 .btn-comp .nome { text-align: center; line-height: var(--lh-tight); }
@@ -275,12 +275,11 @@ main { flex: 1; padding: var(--sp-4); }
 .btn-comp.flash { animation: flash .5s ease; }
 @keyframes flash { 0%{ background:var(--bg-success) } 100%{ background:var(--bg-accent) } }
 
-/* Contador do animal — topo do botão */
+/* Contador do animal — canto superior direito */
 .cont-animal {
   position: absolute;
-  top: 7px; left: 0; right: 0;
+  top: 7px; right: 7px;
   display: flex;
-  justify-content: center;
 }
 .cont-animal .num {
   background: var(--bg-primary);
@@ -318,12 +317,22 @@ main { flex: 1; padding: var(--sp-4); }
 /* Botões de duração */
 .btn-comp.tipo-dur .cont-total.dur { background: var(--bg-duration); }
 .btn-comp.tipo-dur .crono { font-variant-numeric: tabular-nums; }
-.btn-comp.tipo-dur::after {
-  content: "⏱";
+
+/* Flags laterais — ⏱ e 👥 empilhados na esquerda */
+.btn-flags {
   position: absolute;
-  top: 7px; left: 9px;
-  font-size: var(--fs-xs);
-  opacity: .5;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  align-items: center;
+}
+.flag-dur, .flag-soc {
+  font-size: 1.2rem;
+  line-height: 1;
+  opacity: 0.72;
 }
 .btn-comp.rodando {
   background: #7fb98a;
@@ -727,15 +736,7 @@ table.tab .cel-t {
 }
 
 /* ─── COMPORTAMENTOS SOCIAIS (v3) ─────────────────────────── */
-/* Badge 👥 no canto do botão */
-.btn-comp.social::after {
-  content: "👥";
-  position: absolute;
-  top: 6px; right: 8px;
-  font-size: 0.85rem;
-  opacity: 0.75;
-  line-height: 1;
-}
+/* Badge 👥 agora em .flag-soc dentro de .btn-flags (esquerda) */
 /* Toggle social no cfg */
 .social-toggle {
   display: flex;
@@ -1213,10 +1214,12 @@ function renderGrade(){
     b.dataset.nome=c.nome;
     const nA=(contadoresAnimal[animalAtivo]||{})[c.nome]||0;
     const nT=contadoresGeral[c.nome]||0;
+    const flags=(c.dur?'<span class="flag-dur">⏱</span>':'')+(c.social?'<span class="flag-soc">👥</span>':'');
     const rodape=c.dur
-      ?`<span class="cont-total dur">⏱ <span class="crono">--</span></span>`
+      ?`<span class="cont-total dur"><span class="crono">--</span></span>`
       :`<span class="cont-total">total: <b>${nT}</b></span>`;
-    b.innerHTML=`<span class="cont-animal ${nA?'':'zero'}"><span class="num">${nA}</span></span>
+    b.innerHTML=`${flags?`<span class="btn-flags">${flags}</span>`:''}
+                 <span class="cont-animal ${nA?'':'zero'}"><span class="num">${nA}</span></span>
                  <span class="ico">${c.ico}</span><span class="nome">${c.nome}</span>
                  ${rodape}`;
     b.onclick=()=>registrar(c,b);
