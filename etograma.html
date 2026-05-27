@@ -1444,26 +1444,63 @@ body.em-registrar .animais-bar { display: flex; }
   </section>
 
   <section class="painel" id="painel-cfg">
-    <div class="sec-tit">👤 Observador</div>
-    <p class="dica">Seu nome será gravado em cada registro e incluído nas planilhas exportadas — essencial ao consolidar dados de múltiplos dispositivos.</p>
-    <div class="cfg-item">
-      <input id="obs-nome" class="nome-in" placeholder="Ex: Maria Silva" maxlength="60">
+
+  <!-- OBSERVADOR -->
+  <div class="sec-card">
+    <div class="sec-header">
+      <div class="sec-title-group">
+        <span class="sec-title">👤 Observador</span>
+      </div>
     </div>
+    <div class="sec-body">
+      <p class="dica">Seu nome será gravado em cada registro e incluído nas planilhas exportadas — essencial ao consolidar dados de múltiplos dispositivos.</p>
+      <div class="cfg-item">
+        <input id="obs-nome" class="nome-in" placeholder="Ex: Maria Silva" maxlength="60">
+      </div>
+    </div>
+  </div>
 
-    <div class="sec-tit">🏷️ Animais (brincos)</div>
-    <p class="dica">Cadastre os animais que vai observar. No registro, toque no brinco para selecioná-lo antes do comportamento. <a class="link-modelo" href="animais-modelo.csv" download>⬇️ baixar modelo CSV</a></p>
-    <div id="animaisLista"></div>
-    <button class="add-btn" id="addAnimal">＋ Adicionar animal</button>
-    <button class="import-btn" id="importAnimaisBt">📥 Importar CSV de animais</button>
-    <input type="file" id="fileAnimais" accept=".csv,text/csv" hidden>
+  <!-- ANIMAIS -->
+  <div class="sec-card">
+    <div class="sec-header">
+      <div class="sec-title-group">
+        <span class="sec-title">🏷️ Animais (brincos)</span>
+        <span class="sec-badge" id="badge-animais">0</span>
+      </div>
+      <div class="sec-spacer"></div>
+      <div class="sec-actions">
+        <button class="sec-btn add" id="btnAddAnimal" title="Adicionar animal">＋</button>
+        <button class="sec-btn imp" id="btnImpAnimais" title="Importar CSV de animais">⬆</button>
+      </div>
+    </div>
+    <div class="sec-body">
+      <p class="dica">Cadastre os animais que vai observar. No registro, toque no brinco para selecioná-lo antes do comportamento. <a class="link-modelo" href="animais-modelo.csv" download>⬇️ baixar modelo CSV</a></p>
+      <div id="animaisLista" class="chip-cfg-row"></div>
+    </div>
+  </div>
+  <input type="file" id="fileAnimais" accept=".csv,text/csv" hidden>
 
-    <div class="sec-tit">🐄 Comportamentos</div>
-    <p class="dica">Personalize os botões. Use um emoji no campo do ícone. <a class="link-modelo" href="comportamentos-modelo.csv" download>⬇️ baixar modelo CSV</a></p>
-    <div id="compLista"></div>
-    <button class="add-btn" id="addComp">＋ Adicionar comportamento</button>
-    <button class="import-btn" id="importCompsBt">📥 Importar CSV de comportamentos</button>
-    <input type="file" id="fileComps" accept=".csv,text/csv" hidden>
-  </section>
+  <!-- COMPORTAMENTOS -->
+  <div class="sec-card">
+    <div class="sec-header">
+      <div class="sec-title-group">
+        <span class="sec-title">🐄 Comportamentos</span>
+        <span class="sec-badge" id="badge-comps">0</span>
+      </div>
+      <div class="sec-spacer"></div>
+      <div class="sec-actions">
+        <button class="sec-btn add" id="btnAddComp" title="Adicionar comportamento">＋</button>
+        <button class="sec-btn imp" id="btnImpComps" title="Importar CSV de comportamentos">⬆</button>
+      </div>
+    </div>
+    <div class="sec-body">
+      <p class="dica">Personalize os botões. Use um emoji no campo do ícone. <a class="link-modelo" href="comportamentos-modelo.csv" download>⬇️ baixar modelo CSV</a></p>
+      <div id="compLista"></div>
+    </div>
+  </div>
+  <input type="file" id="fileComps" accept=".csv,text/csv" hidden>
+
+</section>
 </main>
 
 <!-- NAV-BAR: visível apenas em seções (escondida na home) -->
@@ -1480,6 +1517,47 @@ body.em-registrar .animais-bar { display: flex; }
 </nav>
 
 <div id="toast"></div>
+
+<!-- BOTTOM SHEET — edição de comportamento -->
+<div class="sheet-overlay" id="sheet-overlay">
+  <div class="bottom-sheet" id="sheet-comp">
+    <div class="sheet-handle-row"><div class="sheet-handle"></div></div>
+    <div class="sheet-top">
+      <div>
+        <div class="sheet-emoji-box" id="sheet-emoji-box">⭐</div>
+        <div class="sheet-emoji-hint">toque p/ trocar</div>
+        <input id="sheet-ico-hidden" maxlength="3" style="position:absolute;opacity:0;width:0;height:0;pointer-events:none">
+      </div>
+      <div class="sheet-name-wrap">
+        <div class="sheet-name-label">NOME DO COMPORTAMENTO</div>
+        <input id="sheet-nome" type="text" maxlength="40" placeholder="Ex: Pastejando">
+      </div>
+    </div>
+    <div class="sheet-section">
+      <div class="sheet-section-label">Tipo de registro</div>
+      <div class="tipo-toggle">
+        <button class="tipo-opt" id="tipo-inst" onclick="sheetSetTipo('inst')">
+          <span class="tipo-opt-ico">⚡</span>Instantâneo
+        </button>
+        <button class="tipo-opt" id="tipo-dur" onclick="sheetSetTipo('dur')">
+          <span class="tipo-opt-ico">⏱</span>Duração
+        </button>
+      </div>
+    </div>
+    <div class="social-pill-row" id="sheet-social-row" onclick="sheetToggleSocial()">
+      <span class="social-pill-ico">👥</span>
+      <div class="social-pill-text">
+        <div class="social-pill-lbl">Comportamento social</div>
+        <div class="social-pill-sub">Envolve outro animal como alvo</div>
+      </div>
+      <div class="toggle-pill" id="sheet-social-toggle"></div>
+    </div>
+    <div class="sheet-btns">
+      <button class="sheet-cancel" onclick="fecharSheet()">Cancelar</button>
+      <button class="sheet-save" onclick="salvarSheet()">✓ Salvar</button>
+    </div>
+  </div>
+</div>
 
 <div id="modal-alvo" class="modal-overlay" hidden>
   <div class="modal-box">
