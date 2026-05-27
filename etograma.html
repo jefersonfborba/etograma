@@ -432,6 +432,15 @@ main { flex: 1; padding: var(--sp-4); }
   .btn-rec  { font-size: 0.9rem; }
 }
 
+/* Desktop: limitar largura do painel de cadastro */
+@media (min-width: 640px) {
+  #painel-cfg {
+    max-width: 620px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
 /* ─── ABAS / PAINÉIS ─────────────────────────────────────── */
 .painel { display: none; padding: var(--sp-4); }
 .painel.ativo { display: block; }
@@ -647,6 +656,349 @@ table.tab .cel-t {
 }
 
 /* ─── CADASTRO ───────────────────────────────────────────── */
+
+/* ─── SEC-CARD (novo) ───────────────────────────────────────── */
+.sec-card {
+  background: var(--bg-surface);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: var(--sp-4);
+  overflow: hidden;
+}
+.sec-header {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+  padding: var(--sp-2) var(--sp-4);
+  border-bottom: 1px solid var(--border-light);
+}
+.sec-title-group {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+}
+.sec-title {
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-black);
+  letter-spacing: .8px;
+  text-transform: uppercase;
+  color: var(--bg-primary);
+  white-space: nowrap;
+}
+.sec-badge {
+  background: rgba(26,60,31,.18);
+  color: var(--bg-primary);
+  border-radius: var(--r-pill);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-bold);
+  padding: 1px var(--sp-2);
+  white-space: nowrap;
+}
+.sec-spacer { flex: 1; }
+.sec-actions { display: flex; gap: var(--sp-1); }
+.sec-btn {
+  width: 22px; height: 22px;
+  border-radius: var(--r-sm);
+  border: none;
+  display: flex; align-items: center; justify-content: center;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-black);
+  cursor: pointer;
+  /* Área de toque 44px sem crescer visualmente */
+  padding: 11px;
+  margin: -11px;
+  position: relative;
+}
+.sec-btn.add { background: var(--bg-primary); color: var(--text-inverse); }
+.sec-btn.imp { background: var(--bg-page); color: var(--text-secondary); border: 1px solid var(--border-default); font-size: var(--fs-xs); }
+.sec-body { padding: var(--sp-3) var(--sp-4) var(--sp-4); }
+
+/* ─── B-ROW — linha de comportamento (cfg) ──────────────────── */
+.b-row {
+  background: var(--bg-page);
+  border-radius: var(--r-sm);
+  margin-bottom: 3px;
+  padding: var(--sp-2) var(--sp-3);
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  border: 1px solid var(--border-light);
+  cursor: pointer;
+  transition: background .1s;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.b-row:active { background: var(--c-earth-100); }
+.b-drag-handle {
+  width: 18px; height: 28px;
+  border-radius: 4px;
+  background: var(--border-light);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-muted);
+  font-size: var(--fs-2xs);
+  flex-shrink: 0;
+  cursor: grab;
+  touch-action: none;
+}
+.b-drag-handle:active { cursor: grabbing; background: var(--border-default); }
+.b-ico { font-size: var(--fs-lg); width: 26px; text-align: center; flex-shrink: 0; line-height: 1; }
+.b-info { flex: 1; min-width: 0; }
+.b-nome { font-size: var(--fs-2xs); font-weight: var(--fw-bold); color: var(--text-primary); }
+.b-tipo { font-size: 7.5px; color: var(--text-secondary); margin-top: 1px; }
+.b-del {
+  width: 20px; height: 20px;
+  border-radius: var(--r-sm);
+  border: none;
+  background: var(--bg-danger);
+  color: var(--c-white);
+  font-size: var(--fs-2xs);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  cursor: pointer;
+  /* Área de toque 44px */
+  padding: 12px;
+  margin: -12px -12px -12px 0;
+  position: relative;
+}
+.b-row.b-dragging { opacity: 0.3; }
+.b-row.b-drag-ghost {
+  opacity: .88;
+  box-shadow: var(--shadow-md);
+  pointer-events: none;
+  border-radius: var(--r-sm);
+  position: fixed;
+  z-index: 999;
+}
+/* Indicador de posição de soltura */
+.drop-indicator {
+  height: 3px;
+  border-radius: var(--r-pill);
+  background: var(--bg-primary);
+  margin: 2px 0;
+  position: relative;
+  box-shadow: 0 0 0 3px rgba(26,60,31,.15);
+  pointer-events: none;
+}
+.drop-indicator::before,
+.drop-indicator::after {
+  content: '';
+  position: absolute;
+  top: 50%; transform: translateY(-50%);
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--bg-primary);
+}
+.drop-indicator::before { left: 0; }
+.drop-indicator::after  { right: 0; }
+
+/* ─── CHIP-AN — chip de animal na tela de cfg ───────────────── */
+.chip-cfg-row { display: flex; flex-wrap: wrap; gap: var(--sp-1); }
+.chip-cfg {
+  background: var(--bg-primary);
+  color: var(--text-inverse);
+  border-radius: var(--r-pill);
+  padding: var(--sp-1) var(--sp-3);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-black);
+  display: flex; align-items: center; gap: var(--sp-1);
+  border: none;
+  cursor: pointer;
+  user-select: none;
+}
+.chip-cfg input.brinco-in {
+  background: transparent;
+  border: none;
+  color: inherit;
+  font: inherit;
+  font-weight: var(--fw-black);
+  width: auto;
+  min-width: 40px;
+  max-width: 100px;
+  outline: none;
+  padding: 0;
+}
+.chip-cfg .chip-del {
+  background: rgba(255,255,255,.22);
+  border: none;
+  border-radius: 50%;
+  width: 14px; height: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px;
+  color: var(--text-inverse);
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 0;
+}
+
+/* ─── BOTTOM SHEET — edição de comportamento ─────────────────── */
+.sheet-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.45);
+  z-index: 100;
+  display: none;
+  align-items: flex-end;
+  justify-content: center;
+}
+.sheet-overlay.open { display: flex; }
+.bottom-sheet {
+  background: var(--bg-surface);
+  border-radius: var(--r-xl) var(--r-xl) 0 0;
+  width: 100%;
+  max-width: 620px;
+  padding-bottom: calc(env(safe-area-inset-bottom, 8px) + 8px);
+  box-shadow: var(--shadow-modal);
+  animation: sheet-up .22s ease;
+}
+@keyframes sheet-up {
+  from { transform: translateY(60px); opacity: .5; }
+  to   { transform: translateY(0);   opacity: 1;  }
+}
+.sheet-handle-row {
+  display: flex; justify-content: center;
+  padding: var(--sp-3) 0 var(--sp-1);
+}
+.sheet-handle {
+  width: 36px; height: 4px;
+  border-radius: var(--r-pill);
+  background: var(--border-default);
+}
+.sheet-top {
+  display: flex; align-items: center; gap: var(--sp-4);
+  padding: var(--sp-2) var(--sp-6) var(--sp-4);
+  border-bottom: 1px solid var(--border-light);
+}
+.sheet-emoji-box {
+  width: 60px; height: 60px;
+  border-radius: var(--r-md);
+  background: var(--bg-page);
+  border: 2px solid var(--border-default);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2rem;
+  flex-shrink: 0;
+  cursor: pointer;
+  user-select: none;
+}
+.sheet-emoji-hint {
+  font-size: var(--fs-2xs);
+  color: var(--text-muted);
+  text-align: center;
+  margin-top: var(--sp-1);
+}
+.sheet-name-wrap { flex: 1; }
+.sheet-name-label {
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-semibold);
+  color: var(--text-secondary);
+  letter-spacing: .3px;
+  margin-bottom: var(--sp-1);
+}
+#sheet-nome {
+  width: 100%;
+  background: var(--bg-page);
+  border: 1.5px solid rgba(26,60,31,.3);
+  border-radius: var(--r-sm);
+  padding: var(--sp-2) var(--sp-3);
+  font-size: var(--fs-md);
+  font-weight: var(--fw-bold);
+  color: var(--text-primary);
+  font-family: var(--font-primary);
+  box-sizing: border-box;
+}
+#sheet-nome:focus { outline: none; border-color: var(--bg-primary); }
+.sheet-section { padding: var(--sp-3) var(--sp-6) 0; }
+.sheet-section-label {
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: .8px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin-bottom: var(--sp-2);
+}
+.tipo-toggle { display: flex; gap: var(--sp-1); }
+.tipo-opt {
+  flex: 1;
+  padding: var(--sp-2) var(--sp-1);
+  border-radius: var(--r-sm);
+  border: 1.5px solid var(--border-default);
+  background: var(--bg-page);
+  color: var(--text-muted);
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-bold);
+  cursor: pointer;
+  text-align: center;
+  font-family: var(--font-primary);
+  transition: .1s;
+}
+.tipo-opt.ativo {
+  background: var(--bg-primary);
+  color: var(--text-inverse);
+  border-color: var(--bg-primary);
+}
+.tipo-opt-ico { font-size: var(--fs-sm); display: block; margin-bottom: 2px; }
+.social-pill-row {
+  display: flex; align-items: center; gap: var(--sp-3);
+  background: var(--bg-page);
+  border-radius: var(--r-sm);
+  padding: var(--sp-3) var(--sp-4);
+  margin: var(--sp-3) var(--sp-6) 0;
+  cursor: pointer;
+  min-height: var(--touch-min);
+}
+.social-pill-ico { font-size: var(--fs-md); flex-shrink: 0; }
+.social-pill-text { flex: 1; }
+.social-pill-lbl { font-size: var(--fs-xs); font-weight: var(--fw-bold); color: var(--text-primary); }
+.social-pill-sub { font-size: var(--fs-2xs); color: var(--text-secondary); margin-top: 2px; }
+.toggle-pill {
+  width: 36px; height: 20px;
+  border-radius: var(--r-pill);
+  background: var(--border-default);
+  position: relative;
+  flex-shrink: 0;
+  transition: background .15s;
+}
+.toggle-pill.on { background: var(--bg-primary); }
+.toggle-pill::after {
+  content: '';
+  position: absolute;
+  top: 3px; left: 3px;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--c-white);
+  box-shadow: 0 1px 3px rgba(0,0,0,.2);
+  transition: transform .15s;
+}
+.toggle-pill.on::after { transform: translateX(16px); }
+.sheet-btns {
+  display: flex; gap: var(--sp-2);
+  padding: var(--sp-4) var(--sp-6) 0;
+}
+.sheet-cancel {
+  flex: 1;
+  padding: var(--sp-3);
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border-default);
+  background: var(--bg-page);
+  color: var(--text-secondary);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  cursor: pointer;
+  font-family: var(--font-primary);
+  min-height: var(--touch-field);
+}
+.sheet-save {
+  flex: 2;
+  padding: var(--sp-3);
+  border-radius: var(--r-sm);
+  border: none;
+  background: var(--bg-primary);
+  color: var(--text-inverse);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-black);
+  cursor: pointer;
+  font-family: var(--font-primary);
+  min-height: var(--touch-field);
+}
+
 .cfg-item {
   background: var(--bg-surface);
   border-radius: var(--r-md);
@@ -689,6 +1041,10 @@ table.tab .cel-t {
   margin-bottom: var(--sp-3);
   box-shadow: var(--shadow-sm);
   border: 1.5px solid var(--border-light);
+  /* Evita seleção de texto ao iniciar drag no mobile */
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }
 .comp-card.dragging { opacity: 0.35; box-shadow: none; }
 .comp-card.drag-over { border-color: var(--bg-accent); box-shadow: 0 0 0 2px var(--bg-accent-lt); }
@@ -719,10 +1075,10 @@ table.tab .cel-t {
   color: #fff;
   border: none;
   border-radius: var(--r-sm);
-  width: 38px; height: 38px;
+  width: 44px; height: 44px;   /* era 38×38 — alinhado à altura dos inputs */
   font-size: var(--fs-xs);
   cursor: pointer;
-  flex: 0 0 auto;
+  flex: 0 0 44px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -733,6 +1089,42 @@ table.tab .cel-t {
   box-shadow: var(--shadow-md);
   pointer-events: none;
   border-radius: var(--r-md);
+}
+
+/* ─── COMP-CARD INPUTS ───────────────────────────────────────── */
+/* Os seletores .cfg-item input.* não alcançam os inputs dentro   */
+/* do .comp-card-header — estes precisam de regras próprias.      */
+.comp-card-header input {
+  border: 1px solid var(--border-default);
+  border-radius: var(--r-sm);
+  padding: 0 var(--sp-2);
+  font-size: var(--fs-sm);
+  height: 44px;
+  background: var(--bg-surface);
+}
+.comp-card-header input.ico-in {
+  width: 52px;
+  flex: 0 0 52px;
+  text-align: center;
+  font-size: var(--fs-lg);   /* emoji legível no campo */
+  padding: 0;
+}
+.comp-card-header input.nome-in {
+  flex: 1;
+  min-width: 0;              /* evita overflow em flex */
+  font-weight: var(--fw-bold);
+  padding: 0 var(--sp-2);
+}
+.comp-card-footer .tipo-sel {
+  border: 1px solid var(--border-default);
+  border-radius: var(--r-sm);
+  padding: var(--sp-2) var(--sp-1);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  background: var(--bg-surface);
+  flex: 0 0 auto;
+  min-height: var(--touch-min);
+  max-width: 155px;
 }
 
 /* ─── COMPORTAMENTOS SOCIAIS (v3) ─────────────────────────── */
