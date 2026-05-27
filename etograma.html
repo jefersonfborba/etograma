@@ -672,6 +672,60 @@ table.tab .cel-t {
 }
 .cfg-item input.brinco-in  { flex: 1; font-weight: var(--fw-black); font-size: var(--fs-sm); }
 
+/* ─── CARD DE COMPORTAMENTO (cfg) ───────────────────────────── */
+.comp-card {
+  background: var(--bg-surface);
+  border-radius: var(--r-md);
+  padding: var(--sp-3) var(--sp-3) var(--sp-2);
+  margin-bottom: var(--sp-3);
+  box-shadow: var(--shadow-sm);
+  border: 1.5px solid var(--border-light);
+}
+.comp-card.dragging { opacity: 0.35; box-shadow: none; }
+.comp-card.drag-over { border-color: var(--bg-accent); box-shadow: 0 0 0 2px var(--bg-accent-lt); }
+.comp-card-header {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-2);
+}
+.drag-handle {
+  color: var(--text-muted);
+  font-size: 1.3rem;
+  cursor: grab;
+  padding: 0 var(--sp-1);
+  line-height: 1;
+  flex: 0 0 auto;
+  touch-action: none;
+}
+.drag-handle:active { cursor: grabbing; color: var(--text-secondary); }
+.comp-card-footer {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+}
+.btn-del-comp {
+  background: var(--bg-danger);
+  color: #fff;
+  border: none;
+  border-radius: var(--r-sm);
+  width: 38px; height: 38px;
+  font-size: var(--fs-xs);
+  cursor: pointer;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+}
+.drag-ghost {
+  opacity: 0.88;
+  box-shadow: var(--shadow-md);
+  pointer-events: none;
+  border-radius: var(--r-md);
+}
+
 /* ─── COMPORTAMENTOS SOCIAIS (v3) ─────────────────────────── */
 /* Badge 👥 no canto do botão */
 .btn-comp.social::after {
@@ -1681,31 +1735,119 @@ document.getElementById("addAnimal").onclick=()=>{
 };
 
 /* ---------- Cadastro de comportamentos ---------- */
+/* ── Drag-to-reorder state ── */
+let _tdCard=null,_tdIdx=null,_tdClone=null,_tdTimer=null,_ddIdx=null;
+
 function renderCompCfg(){
-  const cont=document.getElementById("compLista");cont.innerHTML="";
+  const cont=document.getElementById("compLista");
+  cont.innerHTML="";
   comps.forEach((c,i)=>{
-    const div=document.createElement("div");div.className="cfg-item cfg-comp";
+    const card=document.createElement("div");
+    card.className="comp-card";
+    card.draggable=true;
+    card.dataset.idx=String(i);
     const chkId="soc-"+i;
-    div.innerHTML=`<input class="ico-in" value="${c.ico}" maxlength="3">
-      <input class="nome-in" value="${c.nome}">
-      <select class="tipo-sel"><option value="inst">⚡ Instantâneo</option><option value="dur">⏱ Duração</option></select>
-      <label class="social-toggle${c.social?' ativo':''}" title="Envolve dois animais">
-        <input type="checkbox" id="${chkId}"${c.social?" checked":""}> 👥
-      </label>
-      <button>✕</button>`;
-    const icoIn=div.querySelector(".ico-in"),nomeIn=div.querySelector(".nome-in");
-    const tipoSel=div.querySelector(".tipo-sel"),socChk=div.querySelector("#"+chkId);
+    card.innerHTML=`
+      <div class="comp-card-header">
+        <span class="drag-handle" title="Arrastar para reordenar">⠿</span>
+        <input class="ico-in" value="${c.ico}" maxlength="3">
+        <input class="nome-in" value="${c.nome}">
+        <button class="btn-del-comp" title="Remover">✕</button>
+      </div>
+      <div class="comp-card-footer">
+        <select class="tipo-sel">
+          <option value="inst">⚡ Instantâneo</option>
+          <option value="dur">⏱ Duração</option>
+        </select>
+        <label class="social-toggle${c.social?' ativo':''}" title="Envolve dois animais">
+          <input type="checkbox" id="${chkId}"${c.social?" checked":""}> 👥 Social
+        </label>
+      </div>`;
+    const icoIn=card.querySelector(".ico-in"),nomeIn=card.querySelector(".nome-in");
+    const tipoSel=card.querySelector(".tipo-sel"),socChk=card.querySelector("#"+chkId);
     tipoSel.value=c.dur?"dur":"inst";
     icoIn.oninput=()=>{comps[i].ico=icoIn.value;persistirComps();};
     nomeIn.oninput=()=>{comps[i].nome=nomeIn.value;persistirComps();};
     tipoSel.onchange=()=>{comps[i].dur=(tipoSel.value==="dur");persistirComps();};
     socChk.onchange=()=>{
       comps[i].social=socChk.checked;
-      div.querySelector(".social-toggle").classList.toggle("ativo",socChk.checked);
+      card.querySelector(".social-toggle").classList.toggle("ativo",socChk.checked);
       persistirComps();renderGrade();
     };
-    div.querySelector("button").onclick=()=>{comps.splice(i,1);persistirComps();renderCompCfg();};
-    cont.appendChild(div);
+    card.querySelector(".btn-del-comp").onclick=()=>{comps.splice(i,1);persistirComps();renderCompCfg();};
+
+    /* ── HTML5 Drag & Drop (desktop) ── */
+    card.addEventListener("dragstart",e=>{
+      _ddIdx=i;
+      e.dataTransfer.effectAllowed="move";
+      setTimeout(()=>card.classList.add("dragging"),0);
+    });
+    card.addEventListener("dragend",()=>{
+      card.classList.remove("dragging");
+      cont.querySelectorAll(".comp-card").forEach(c=>c.classList.remove("drag-over"));
+    });
+    card.addEventListener("dragover",e=>{
+      e.preventDefault();
+      if(card.dataset.idx!==String(_ddIdx)){
+        cont.querySelectorAll(".comp-card").forEach(c=>c.classList.remove("drag-over"));
+        card.classList.add("drag-over");
+      }
+    });
+    card.addEventListener("drop",e=>{
+      e.stopPropagation();
+      const toIdx=parseInt(card.dataset.idx);
+      if(toIdx!==_ddIdx){
+        const[m]=comps.splice(_ddIdx,1);comps.splice(toIdx,0,m);
+        persistirComps();renderCompCfg();renderGrade();
+      }
+    });
+
+    /* ── Touch Drag (mobile) — arrastar pelo handle ── */
+    const handle=card.querySelector(".drag-handle");
+    handle.addEventListener("touchstart",e=>{
+      _tdTimer=setTimeout(()=>{
+        _tdCard=card;_tdIdx=i;
+        card.classList.add("dragging");
+        _tdClone=card.cloneNode(true);
+        _tdClone.classList.add("drag-ghost");
+        _tdClone.style.cssText=`position:fixed;width:${card.offsetWidth}px;z-index:999;pointer-events:none;top:0;left:0;`;
+        document.body.appendChild(_tdClone);
+        if(navigator.vibrate)navigator.vibrate(40);
+      },250);
+    },{passive:true});
+    handle.addEventListener("touchmove",e=>{
+      if(!_tdCard){clearTimeout(_tdTimer);return;}
+      e.preventDefault();
+      const t=e.touches[0];
+      if(_tdClone){
+        _tdClone.style.left=(t.clientX-_tdClone.offsetWidth/2)+"px";
+        _tdClone.style.top=(t.clientY-40)+"px";
+      }
+      _tdClone&&(_tdClone.style.display="none");
+      const el=document.elementFromPoint(t.clientX,t.clientY);
+      _tdClone&&(_tdClone.style.display="");
+      const over=el&&el.closest(".comp-card");
+      cont.querySelectorAll(".comp-card").forEach(c=>c.classList.remove("drag-over"));
+      if(over&&over!==_tdCard)over.classList.add("drag-over");
+    },{passive:false});
+    const endTouch=()=>{
+      clearTimeout(_tdTimer);
+      if(!_tdCard)return;
+      if(_tdClone){_tdClone.remove();_tdClone=null;}
+      _tdCard.classList.remove("dragging");
+      const over=cont.querySelector(".comp-card.drag-over");
+      if(over){
+        over.classList.remove("drag-over");
+        const toIdx=parseInt(over.dataset.idx);
+        const[m]=comps.splice(_tdIdx,1);comps.splice(toIdx,0,m);
+        persistirComps();renderCompCfg();renderGrade();
+      }
+      _tdCard=null;_tdIdx=null;
+    };
+    handle.addEventListener("touchend",endTouch,{passive:true});
+    handle.addEventListener("touchcancel",endTouch,{passive:true});
+
+    cont.appendChild(card);
   });
 }
 async function persistirComps(){await salvarConfig("comps",comps);await recarregarContadores();}
