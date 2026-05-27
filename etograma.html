@@ -2319,79 +2319,81 @@ function renderCompCfg(){
   const cont=document.getElementById("compLista");
   cont.innerHTML="";
   comps.forEach((c,i)=>{
-    const card=document.createElement("div");
-    card.className="comp-card";
-    card.draggable=true;
-    card.dataset.idx=String(i);
-    const chkId="soc-"+i;
-    card.innerHTML=`
-      <div class="comp-card-header">
-        <span class="drag-handle" title="Arrastar para reordenar">⠿</span>
-        <input class="ico-in" value="${c.ico}" maxlength="3">
-        <input class="nome-in" value="${c.nome}">
-        <button class="btn-del-comp" title="Remover">✕</button>
+    const row=document.createElement("div");
+    row.className="b-row";
+    row.draggable=true;
+    row.dataset.idx=String(i);
+
+    const tipoLabel = c.dur
+      ? "⏱ Duração"
+      : "⚡ Instantâneo";
+    const socialLabel = c.social ? " · 👥 Social" : "";
+
+    row.innerHTML=`
+      <div class="b-drag-handle" title="Arrastar para reordenar">⠿</div>
+      <span class="b-ico">${c.ico}</span>
+      <div class="b-info">
+        <div class="b-nome">${c.nome}</div>
+        <div class="b-tipo">${tipoLabel}${socialLabel}</div>
       </div>
-      <div class="comp-card-footer">
-        <select class="tipo-sel">
-          <option value="inst">⚡ Instantâneo</option>
-          <option value="dur">⏱ Duração</option>
-        </select>
-        <label class="social-toggle${c.social?' ativo':''}" title="Envolve dois animais">
-          <input type="checkbox" id="${chkId}"${c.social?" checked":""}> 👥 Social
-        </label>
-      </div>`;
-    const icoIn=card.querySelector(".ico-in"),nomeIn=card.querySelector(".nome-in");
-    const tipoSel=card.querySelector(".tipo-sel"),socChk=card.querySelector("#"+chkId);
-    tipoSel.value=c.dur?"dur":"inst";
-    icoIn.oninput=()=>{comps[i].ico=icoIn.value;persistirComps();};
-    nomeIn.oninput=()=>{comps[i].nome=nomeIn.value;persistirComps();};
-    tipoSel.onchange=()=>{comps[i].dur=(tipoSel.value==="dur");persistirComps();};
-    socChk.onchange=()=>{
-      comps[i].social=socChk.checked;
-      card.querySelector(".social-toggle").classList.toggle("ativo",socChk.checked);
-      persistirComps();renderGrade();
-    };
-    card.querySelector(".btn-del-comp").onclick=()=>{comps.splice(i,1);persistirComps();renderCompCfg();};
+      <button class="b-del" title="Remover">✕</button>`;
+
+    /* Toque na linha → abre sheet (exceto no handle e no botão ✕) */
+    row.addEventListener("click", e=>{
+      if(e.target.closest(".b-drag-handle") || e.target.closest(".b-del")) return;
+      abrirSheet(i);
+    });
+    row.querySelector(".b-del").addEventListener("click", e=>{
+      e.stopPropagation();
+      comps.splice(i,1);
+      persistirComps();
+      renderCompCfg();
+      renderGrade();
+    });
 
     /* ── HTML5 Drag & Drop (desktop) ── */
-    card.addEventListener("dragstart",e=>{
+    row.addEventListener("dragstart",e=>{
       _ddIdx=i;
       e.dataTransfer.effectAllowed="move";
-      setTimeout(()=>card.classList.add("dragging"),0);
+      setTimeout(()=>row.classList.add("b-dragging"),0);
     });
-    card.addEventListener("dragend",()=>{
-      card.classList.remove("dragging");
-      cont.querySelectorAll(".comp-card").forEach(c=>c.classList.remove("drag-over"));
+    row.addEventListener("dragend",()=>{
+      row.classList.remove("b-dragging");
+      cont.querySelectorAll(".drop-indicator").forEach(el=>el.remove());
     });
-    card.addEventListener("dragover",e=>{
+    row.addEventListener("dragover",e=>{
       e.preventDefault();
-      if(card.dataset.idx!==String(_ddIdx)){
-        cont.querySelectorAll(".comp-card").forEach(c=>c.classList.remove("drag-over"));
-        card.classList.add("drag-over");
+      cont.querySelectorAll(".drop-indicator").forEach(el=>el.remove());
+      if(row.dataset.idx!==String(_ddIdx)){
+        const indicator=document.createElement("div");
+        indicator.className="drop-indicator";
+        row.before(indicator);
       }
     });
-    card.addEventListener("drop",e=>{
+    row.addEventListener("drop",e=>{
       e.stopPropagation();
-      const toIdx=parseInt(card.dataset.idx);
+      cont.querySelectorAll(".drop-indicator").forEach(el=>el.remove());
+      const toIdx=parseInt(row.dataset.idx);
       if(toIdx!==_ddIdx){
         const[m]=comps.splice(_ddIdx,1);comps.splice(toIdx,0,m);
         persistirComps();renderCompCfg();renderGrade();
       }
     });
 
-    /* ── Touch Drag (mobile) — arrastar pelo handle ── */
-    const handle=card.querySelector(".drag-handle");
+    /* ── Touch Drag (mobile) ── */
+    const handle=row.querySelector(".b-drag-handle");
     handle.addEventListener("touchstart",e=>{
       _tdTimer=setTimeout(()=>{
-        _tdCard=card;_tdIdx=i;
-        card.classList.add("dragging");
-        _tdClone=card.cloneNode(true);
-        _tdClone.classList.add("drag-ghost");
-        _tdClone.style.cssText=`position:fixed;width:${card.offsetWidth}px;z-index:999;pointer-events:none;top:0;left:0;`;
+        _tdCard=row;_tdIdx=i;
+        row.classList.add("b-dragging");
+        _tdClone=row.cloneNode(true);
+        _tdClone.classList.add("b-drag-ghost");
+        _tdClone.style.cssText=`width:${row.offsetWidth}px;top:0;left:0;`;
         document.body.appendChild(_tdClone);
         if(navigator.vibrate)navigator.vibrate(40);
       },250);
     },{passive:true});
+
     handle.addEventListener("touchmove",e=>{
       if(!_tdCard){clearTimeout(_tdTimer);return;}
       e.preventDefault();
@@ -2400,31 +2402,50 @@ function renderCompCfg(){
         _tdClone.style.left=(t.clientX-_tdClone.offsetWidth/2)+"px";
         _tdClone.style.top=(t.clientY-40)+"px";
       }
+      /* encontrar row sob o dedo */
       _tdClone&&(_tdClone.style.display="none");
       const el=document.elementFromPoint(t.clientX,t.clientY);
       _tdClone&&(_tdClone.style.display="");
-      const over=el&&el.closest(".comp-card");
-      cont.querySelectorAll(".comp-card").forEach(c=>c.classList.remove("drag-over"));
-      if(over&&over!==_tdCard)over.classList.add("drag-over");
+      cont.querySelectorAll(".drop-indicator").forEach(el=>el.remove());
+      const over=el&&el.closest(".b-row");
+      if(over&&over!==_tdCard){
+        const indicator=document.createElement("div");
+        indicator.className="drop-indicator";
+        over.before(indicator);
+      }
     },{passive:false});
-    const endTouch=()=>{
+
+    handle.addEventListener("touchend",e=>{
       clearTimeout(_tdTimer);
       if(!_tdCard)return;
       if(_tdClone){_tdClone.remove();_tdClone=null;}
-      _tdCard.classList.remove("dragging");
-      const over=cont.querySelector(".comp-card.drag-over");
-      if(over){
-        over.classList.remove("drag-over");
-        const toIdx=parseInt(over.dataset.idx);
-        const[m]=comps.splice(_tdIdx,1);comps.splice(toIdx,0,m);
-        persistirComps();renderCompCfg();renderGrade();
+      _tdCard.classList.remove("b-dragging");
+      const indicator=cont.querySelector(".drop-indicator");
+      if(indicator){
+        /* calcular toIdx pelo próximo .b-row após o indicador */
+        const nextRow=indicator.nextElementSibling;
+        const toIdx=nextRow?parseInt(nextRow.dataset.idx):comps.length;
+        indicator.remove();
+        if(toIdx!==_tdIdx&&toIdx!==null){
+          const[m]=comps.splice(_tdIdx,1);
+          const insertAt=toIdx>_tdIdx?toIdx-1:toIdx;
+          comps.splice(insertAt,0,m);
+          persistirComps();renderCompCfg();renderGrade();
+        }
+      } else {
+        cont.querySelectorAll(".drop-indicator").forEach(el=>el.remove());
       }
       _tdCard=null;_tdIdx=null;
-    };
-    handle.addEventListener("touchend",endTouch,{passive:true});
-    handle.addEventListener("touchcancel",endTouch,{passive:true});
+    },{passive:true});
+    handle.addEventListener("touchcancel",()=>{
+      clearTimeout(_tdTimer);
+      if(_tdClone){_tdClone.remove();_tdClone=null;}
+      if(_tdCard)_tdCard.classList.remove("b-dragging");
+      cont.querySelectorAll(".drop-indicator").forEach(el=>el.remove());
+      _tdCard=null;_tdIdx=null;
+    },{passive:true});
 
-    cont.appendChild(card);
+    cont.appendChild(row);
   });
 }
 async function persistirComps(){await salvarConfig("comps",comps);await recarregarContadores();atualizarBadgesCfg();}
