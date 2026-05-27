@@ -782,6 +782,13 @@ table.tab .cel-t {
   align-items: center;
 }
 .alvo-chip:active { background: var(--bg-accent-lt); border-color: var(--bg-accent); }
+.alvo-chip.selecionado {
+  background: var(--bg-accent-lt);
+  border-color: var(--bg-accent);
+  color: var(--text-primary);
+  font-weight: var(--fw-black);
+}
+#modal-alvo-salvar:disabled { opacity: 0.35; pointer-events: none; }
 .cfg-item button {
   background: var(--bg-danger);
   color: #fff;
@@ -1081,10 +1088,12 @@ body.em-registrar .animais-bar { display: flex; }
 
 <div id="modal-alvo" class="modal-overlay" hidden>
   <div class="modal-box">
-    <div class="alvo-titulo" id="modal-alvo-titulo">Quem está sofrendo a ação?</div>
+    <div class="alvo-titulo" id="modal-alvo-titulo">Quem sofre a ação?</div>
+    <p class="dica" style="text-align:center;margin:2px 0 0">Selecione um ou mais animais</p>
     <div class="alvo-chips" id="modal-alvo-chips"></div>
     <div class="modal-btns">
       <button class="btn-cancel" id="modal-alvo-cancel">Cancelar</button>
+      <button class="btn-ok" id="modal-alvo-salvar" disabled>✅ Registrar</button>
     </div>
   </div>
 </div>
@@ -1263,27 +1272,35 @@ function garantirTick(){
 }
 
 /* ---------- Registrar ---------- */
-/* --- Modal de seleção do animal alvo (comportamentos sociais) --- */
+/* --- Modal de seleção do(s) animal(is) alvo — seleção múltipla --- */
 document.getElementById("modal-alvo-cancel").onclick=()=>{
   document.getElementById("modal-alvo").hidden=true;
 };
 function mostrarModalAlvo(c,btn,callback){
   const outros=animais.filter(a=>a!==animalAtivo);
   if(!outros.length){toast("Cadastre ao menos 2 animais para interações sociais");return;}
-  const titulo=document.getElementById("modal-alvo-titulo");
-  titulo.textContent=`${c.ico} ${c.nome} — quem sofre a ação?`;
+  document.getElementById("modal-alvo-titulo").textContent=`${c.ico} ${c.nome} — quem sofre a ação?`;
   const chips=document.getElementById("modal-alvo-chips");
   chips.innerHTML="";
+  const btnSalvar=document.getElementById("modal-alvo-salvar");
+  btnSalvar.disabled=true;
+  const selecionados=new Set();
   outros.forEach(a=>{
     const b=document.createElement("button");
     b.className="alvo-chip";
     b.textContent="🏷️ "+a;
     b.onclick=()=>{
-      document.getElementById("modal-alvo").hidden=true;
-      callback(a);
+      if(selecionados.has(a)){selecionados.delete(a);b.classList.remove("selecionado");}
+      else{selecionados.add(a);b.classList.add("selecionado");}
+      btnSalvar.disabled=selecionados.size===0;
     };
     chips.appendChild(b);
   });
+  /* substituir o onclick toda vez para capturar o callback correto */
+  btnSalvar.onclick=()=>{
+    document.getElementById("modal-alvo").hidden=true;
+    callback([...selecionados]);
+  };
   document.getElementById("modal-alvo").hidden=false;
 }
 
@@ -1293,66 +1310,76 @@ async function registrar(c,btn){
   /* ── Comportamento SOCIAL ───────────────────────────────── */
   if(c.social){
     if(c.dur){
-      /* social + duração: verifica se já há timer rodando → para; senão → pede alvo → inicia */
-      const chAtivo=timerSocialAtivo(animalAtivo,c.nome);
-      if(chAtivo){
-        /* PARAR timer social */
-        const ativo=timersAtivos[chAtivo];
-        const ini=new Date(ativo.inicio),fim=agora();
-        const durSeg=Math.max(1,Math.round((fim-ini)/1000));
-        delete timersAtivos[chAtivo];
-        salvarConfig("timersAtivos",timersAtivos);
-        const reg={
-          observador:ativo.observador||"",animal:ativo.animal,animal_alvo:ativo.animal_alvo||"",
-          comportamento:c.nome,icone:c.ico,
-          data:dataBR(ini),hora:horaHMS(ini),iso:isoLocal(ini),
-          hora_fim:horaHMS(fim),iso_fim:isoLocal(fim),duracao_seg:durSeg,
-          timestamp:ini.getTime(),tipo:"duracao",audio:null
-        };
-        await addRegistro(reg);
-        contadoresGeral[c.nome]=(contadoresGeral[c.nome]||0)+1;
-        if(ativo.animal){
-          contadoresAnimal[ativo.animal]=contadoresAnimal[ativo.animal]||{};
-          contadoresAnimal[ativo.animal][c.nome]=(contadoresAnimal[ativo.animal][c.nome]||0)+1;
+      /* social + duração: verifica se há timers rodando → para todos; senão → pede alvos → inicia */
+      const chavesAtivas=Object.keys(timersAtivos).filter(k=>k.startsWith((animalAtivo||"")+"||"+c.nome+"→"));
+      if(chavesAtivas.length){
+        /* PARAR todos os timers sociais ativos para este comportamento */
+        const fim=agora();
+        for(const chAtivo of chavesAtivas){
+          const ativo=timersAtivos[chAtivo];
+          const ini=new Date(ativo.inicio);
+          const durSeg=Math.max(1,Math.round((fim-ini)/1000));
+          delete timersAtivos[chAtivo];
+          const reg={
+            observador:ativo.observador||"",animal:ativo.animal,animal_alvo:ativo.animal_alvo||"",
+            comportamento:c.nome,icone:c.ico,
+            data:dataBR(ini),hora:horaHMS(ini),iso:isoLocal(ini),
+            hora_fim:horaHMS(fim),iso_fim:isoLocal(fim),duracao_seg:durSeg,
+            timestamp:ini.getTime(),tipo:"duracao",audio:null
+          };
+          await addRegistro(reg);
+          contadoresGeral[c.nome]=(contadoresGeral[c.nome]||0)+1;
+          if(ativo.animal){
+            contadoresAnimal[ativo.animal]=contadoresAnimal[ativo.animal]||{};
+            contadoresAnimal[ativo.animal][c.nome]=(contadoresAnimal[ativo.animal][c.nome]||0)+1;
+          }
         }
+        salvarConfig("timersAtivos",timersAtivos);
         if(btn){btn.classList.remove("rodando");btn.classList.remove("flash");void btn.offsetWidth;btn.classList.add("flash");atualizarBadge(btn,c.nome);}
         if(navigator.vibrate)navigator.vibrate([40,60,40]);
-        toast(`⏹️ ${c.ico} ${c.nome} — ${fmtDur(durSeg)} (${ativo.animal}→${ativo.animal_alvo||"?"})`);
+        const alvosStr=chavesAtivas.map(k=>k.split("→")[1]).join(", ");
+        toast(`⏹️ ${c.ico} ${c.nome} encerrado (→${alvosStr})`);
         renderAnimaisBar();garantirTick();
         return;
       }
-      /* INICIAR: pedir alvo */
-      mostrarModalAlvo(c,btn,alvo=>{
-        const ch=chaveTimer(animalAtivo,c.nome,alvo);
-        timersAtivos[ch]={inicio:Date.now(),comp:c.nome,icone:c.ico,
-          animal:animalAtivo||"",animal_alvo:alvo,observador:observador};
+      /* INICIAR: pedir alvos (múltiplos) */
+      mostrarModalAlvo(c,btn,alvos=>{
+        alvos.forEach(alvo=>{
+          const ch=chaveTimer(animalAtivo,c.nome,alvo);
+          timersAtivos[ch]={inicio:Date.now(),comp:c.nome,icone:c.ico,
+            animal:animalAtivo||"",animal_alvo:alvo,observador:observador};
+        });
         salvarConfig("timersAtivos",timersAtivos);
         if(btn)btn.classList.add("rodando");
         if(navigator.vibrate)navigator.vibrate(60);
-        toast(`▶️ ${c.ico} ${c.nome} · 🏷️${animalAtivo}→🏷️${alvo}`);
+        const alvosStr=alvos.map(a=>"🏷️"+a).join(", ");
+        toast(`▶️ ${c.ico} ${c.nome} · 🏷️${animalAtivo}→${alvosStr}`);
         renderAnimaisBar();garantirTick();atualizarEstadoTimers();
       });
       return;
     }
-    /* social instantâneo: pedir alvo → registrar */
-    mostrarModalAlvo(c,btn,async alvo=>{
+    /* social instantâneo: pedir alvos (múltiplos) → salvar um registro por alvo */
+    mostrarModalAlvo(c,btn,async alvos=>{
       const d=agora();
-      const reg={
-        observador:observador,animal:animalAtivo||"",animal_alvo:alvo,
-        comportamento:c.nome,icone:c.ico,
-        data:dataBR(d),hora:horaHMS(d),iso:isoLocal(d),
-        hora_fim:"",iso_fim:"",duracao_seg:"",
-        timestamp:d.getTime(),tipo:"botao",audio:null
-      };
-      await addRegistro(reg);
-      contadoresGeral[c.nome]=(contadoresGeral[c.nome]||0)+1;
+      for(const alvo of alvos){
+        const reg={
+          observador:observador,animal:animalAtivo||"",animal_alvo:alvo,
+          comportamento:c.nome,icone:c.ico,
+          data:dataBR(d),hora:horaHMS(d),iso:isoLocal(d),
+          hora_fim:"",iso_fim:"",duracao_seg:"",
+          timestamp:d.getTime(),tipo:"botao",audio:null
+        };
+        await addRegistro(reg);
+      }
+      contadoresGeral[c.nome]=(contadoresGeral[c.nome]||alvos.length);
       if(animalAtivo){
         contadoresAnimal[animalAtivo]=contadoresAnimal[animalAtivo]||{};
-        contadoresAnimal[animalAtivo][c.nome]=(contadoresAnimal[animalAtivo][c.nome]||0)+1;
+        contadoresAnimal[animalAtivo][c.nome]=(contadoresAnimal[animalAtivo][c.nome]||0)+alvos.length;
       }
       if(btn){btn.classList.remove("flash");void btn.offsetWidth;btn.classList.add("flash");atualizarBadge(btn,c.nome);}
       if(navigator.vibrate)navigator.vibrate(40);
-      toast(`${c.ico} ${c.nome} · 🏷️${animalAtivo}→🏷️${alvo} — ${reg.hora}`);
+      const alvosStr=alvos.map(a=>"🏷️"+a).join(", ");
+      toast(`${c.ico} ${c.nome} · 🏷️${animalAtivo}→${alvosStr} — ${horaHMS(d)}`);
     });
     return;
   }
