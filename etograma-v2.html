@@ -767,6 +767,72 @@ table.tab .cel-t {
 }
 .modal-btns .btn-cancel { background: #e8e0d0; color: var(--text-primary); }
 .modal-btns .btn-ok     { background: var(--bg-danger); color: #fff; }
+
+/* ─── HOME SCREEN ────────────────────────────────────────── */
+#painel-home {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0;
+  min-height: calc(100dvh - 140px); /* full height menos header */
+}
+.home-topo {
+  text-align: center;
+  padding: var(--sp-8) var(--sp-4) var(--sp-4);
+  color: var(--text-secondary);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+}
+.home-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-4);
+  padding: var(--sp-4);
+}
+.home-card {
+  border: none;
+  border-radius: var(--r-xl);
+  background: var(--bg-accent);
+  box-shadow: var(--shadow-md);
+  color: var(--text-primary);
+  min-height: 150px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-3);
+  cursor: pointer;
+  padding: var(--sp-6);
+  transition: transform .06s ease, filter .15s ease;
+}
+.home-card:active { transform: scale(.95); filter: brightness(.92); }
+.home-card:nth-child(2) { background: var(--bg-primary-dk); color: var(--text-inverse); }
+.home-card:nth-child(3) { background: var(--bg-duration);   color: #fff; }
+.home-card:nth-child(4) { background: rgba(21,36,15,.12);   color: var(--text-primary); border: 2px solid var(--c-border); box-shadow: var(--shadow-sm); }
+.home-ico { font-size: 2.8rem; line-height: 1; }
+.home-lbl { font-size: var(--fs-md); font-weight: var(--fw-black); text-align: center; line-height: var(--lh-tight); }
+
+/* Nav: escondida na home | tab-strip removido */
+body.em-home .nav-bar { display: none; }
+.tab-strip { display: none; } /* navegação via home screen */
+
+/* Botão "Início" na action-strip (visível em seções) */
+.btn-inicio {
+  flex: 0 0 auto;
+  min-height: var(--touch-field);
+  width: var(--touch-field);
+  border: none;
+  border-radius: var(--r-lg);
+  background: rgba(255,255,255,.12);
+  color: var(--text-inverse);
+  font-size: 1.4rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: filter .15s;
+}
+.btn-inicio:active { filter: brightness(.75); }
 </style>
 </head>
 <body>
@@ -780,7 +846,30 @@ table.tab .cel-t {
 </header>
 
 <main>
-  <section class="painel ativo" id="painel-registrar">
+  <!-- HOME SCREEN — tela inicial de navegação -->
+  <section class="painel ativo" id="painel-home">
+    <div class="home-topo">Selecione uma seção para começar</div>
+    <div class="home-grid">
+      <button class="home-card" data-tab="registrar">
+        <span class="home-ico">📋</span>
+        <span class="home-lbl">Registrar</span>
+      </button>
+      <button class="home-card" data-tab="lista">
+        <span class="home-ico">🗂️</span>
+        <span class="home-lbl">Registros</span>
+      </button>
+      <button class="home-card" data-tab="resumo">
+        <span class="home-ico">📊</span>
+        <span class="home-lbl">Resumo</span>
+      </button>
+      <button class="home-card" data-tab="cfg">
+        <span class="home-ico">⚙️</span>
+        <span class="home-lbl">Cadastros</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="painel" id="painel-registrar">
     <div class="aviso-sel" id="avisoSel">👆 Selecione um animal acima antes de registrar.</div>
     <div class="grade" id="grade"></div>
   </section>
@@ -819,33 +908,17 @@ table.tab .cel-t {
   </section>
 </main>
 
-<!-- FASE 2: .barra + .tabbar → .nav-bar unificada            -->
-<!-- FIX: safe-area agora no elemento correto (mais baixo) ✅  -->
+<!-- NAV-BAR: visível apenas em seções (escondida na home) -->
+<!-- safe-area aqui — elemento mais próximo da borda física ✅ -->
 <nav class="nav-bar">
   <div class="action-strip">
     <button id="btnRec" class="btn-rec">
       <span class="dot"></span>
       <span id="recLabel">Gravar áudio</span>
     </button>
+    <button class="btn-inicio" id="btnInicio" title="Voltar ao início">🏠</button>
   </div>
-  <div class="tab-strip">
-    <button class="tab-item ativo" data-tab="registrar">
-      <span class="tab-ico">📋</span>
-      <span class="tab-lbl">Registrar</span>
-    </button>
-    <button class="tab-item" data-tab="lista">
-      <span class="tab-ico">🗂️</span>
-      <span class="tab-lbl">Registros</span>
-    </button>
-    <button class="tab-item" data-tab="resumo">
-      <span class="tab-ico">📊</span>
-      <span class="tab-lbl">Resumo</span>
-    </button>
-    <button class="tab-item" data-tab="cfg">
-      <span class="tab-ico">⚙️</span>
-      <span class="tab-lbl">Cadastros</span>
-    </button>
-  </div>
+  <!-- tab-strip removido: navegação via home screen -->
 </nav>
 
 <div id="toast"></div>
@@ -1359,19 +1432,27 @@ async function persistirComps(){await salvarConfig("comps",comps);await recarreg
 document.getElementById("addComp").onclick=()=>{comps.push({ico:"⭐",nome:"Novo",dur:false});persistirComps();renderCompCfg();};
 document.getElementById("obs-nome").oninput=async e=>{observador=e.target.value;await salvarConfig("observador",observador);};
 
-/* ---------- Abas — FASE 2: .tabbar button → .tab-item ---------- */
-document.querySelectorAll(".tab-item").forEach(b=>{
-  b.onclick=()=>{
-    document.querySelectorAll(".tab-item").forEach(x=>x.classList.remove("ativo"));
-    document.querySelectorAll(".painel").forEach(x=>x.classList.remove("ativo"));
-    b.classList.add("ativo");
-    const tab=b.dataset.tab;
-    document.getElementById("painel-"+tab).classList.add("ativo");
+/* ---------- Navegação — home screen + seções ---------- */
+function irPara(tab){
+  document.querySelectorAll(".painel").forEach(x=>x.classList.remove("ativo"));
+  document.getElementById("painel-"+tab).classList.add("ativo");
+  if(tab==="home"){
+    document.body.classList.add("em-home");
+  }else{
+    document.body.classList.remove("em-home");
     if(tab==="lista"){renderFiltro();renderLista();}
     if(tab==="resumo")renderResumo();
     if(tab==="cfg"){document.getElementById("obs-nome").value=observador;renderAnimaisCfg();renderCompCfg();}
-  };
+  }
+}
+
+// Cards da home screen
+document.querySelectorAll(".home-card").forEach(b=>{
+  b.onclick=()=>irPara(b.dataset.tab);
 });
+
+// Botão 🏠 na action-strip
+document.getElementById("btnInicio").onclick=()=>irPara("home");
 
 document.getElementById("expXlsx").onclick=exportarXLSX;
 document.getElementById("expCsv").onclick=exportarCSV;
@@ -1398,6 +1479,8 @@ document.getElementById("limpar").onclick=()=>confirmar(
   await recarregarContadores();
   garantirTick();atualizarEstadoTimers();
   document.getElementById("relogio").textContent=horaHMS(agora());
+  // Iniciar na home screen
+  document.body.classList.add("em-home");
   if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();
   if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js');
 })();
