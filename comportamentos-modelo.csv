@@ -1,11 +1,13 @@
-ico,nome,dur
-🛌,Deitado,sim
-🐄,Levantou,nao
-🌾,Pastejando,sim
-💧,Bebeu água,nao
-🔄,Ruminando,sim
-💦,Urinou,nao
-💩,Defecou,nao
-🚶,Caminhando,sim
-🤜,Interação social,nao
-🪰,Espantando moscas,nao
+ico,nome,dur,social
+🛌,Deitado,sim,nao
+🐄,Levantou,nao,nao
+🌾,Pastejando,sim,nao
+💧,Bebeu água,nao,nao
+🔄,Ruminando,sim,nao
+💦,Urinou,nao,nao
+💩,Defecou,nao,nao
+🚶,Caminhando,sim,nao
+🤜,Interação social,nao,sim
+😤,Ameaça,nao,sim
+🦷,Morder,nao,sim
+🪰,Espantando moscas,nao,nao
