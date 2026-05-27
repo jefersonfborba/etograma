@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="Etograma">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<title>Etograma de Campo — Bovinos</title>
+<title>Etograma de Campo — Bovinos v3</title>
 <style>
 /* ============================================================
    ETOGRAMA v2 — Design System
@@ -671,6 +671,62 @@ table.tab .cel-t {
   max-width: 135px;
 }
 .cfg-item input.brinco-in  { flex: 1; font-weight: var(--fw-black); font-size: var(--fs-sm); }
+
+/* ─── COMPORTAMENTOS SOCIAIS (v3) ─────────────────────────── */
+/* Badge 👥 no canto do botão */
+.btn-comp.social::after {
+  content: "👥";
+  position: absolute;
+  top: 6px; right: 8px;
+  font-size: 0.85rem;
+  opacity: 0.75;
+  line-height: 1;
+}
+/* Toggle social no cfg */
+.social-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  color: var(--text-hint);
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+.social-toggle input[type=checkbox] {
+  width: 17px; height: 17px;
+  cursor: pointer;
+  accent-color: var(--bg-primary);
+}
+.social-toggle.ativo { color: var(--bg-primary); }
+/* Modal de seleção do animal alvo */
+.alvo-titulo {
+  font-weight: var(--fw-black);
+  font-size: var(--fs-sm);
+  margin-bottom: var(--sp-3);
+  text-align: center;
+}
+.alvo-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+  justify-content: center;
+  padding: var(--sp-2) 0 var(--sp-4);
+}
+.alvo-chip {
+  padding: var(--sp-3) var(--sp-5);
+  border: 2px solid var(--border-default);
+  border-radius: var(--r-pill);
+  background: var(--bg-page);
+  font-weight: var(--fw-black);
+  font-size: var(--fs-sm);
+  cursor: pointer;
+  min-height: var(--touch-field);
+  display: flex;
+  align-items: center;
+}
+.alvo-chip:active { background: var(--bg-accent-lt); border-color: var(--bg-accent); }
 .cfg-item button {
   background: var(--bg-danger);
   color: #fff;
@@ -968,6 +1024,16 @@ body.em-registrar .animais-bar { display: flex; }
 
 <div id="toast"></div>
 
+<div id="modal-alvo" class="modal-overlay" hidden>
+  <div class="modal-box">
+    <div class="alvo-titulo" id="modal-alvo-titulo">Quem está sofrendo a ação?</div>
+    <div class="alvo-chips" id="modal-alvo-chips"></div>
+    <div class="modal-btns">
+      <button class="btn-cancel" id="modal-alvo-cancel">Cancelar</button>
+    </div>
+  </div>
+</div>
+
 <div id="modal-import" class="modal-overlay" hidden>
   <div class="modal-box">
     <p id="modal-import-msg" style="white-space:pre-line"></p>
@@ -998,7 +1064,10 @@ body.em-registrar .animais-bar { display: flex; }
 const DEFAULT_COMPS = [
   {ico:"🛌",nome:"Deitado",dur:true},{ico:"🐄",nome:"Levantou"},{ico:"🌾",nome:"Pastejando",dur:true},
   {ico:"💧",nome:"Bebeu água"},{ico:"🔄",nome:"Ruminando",dur:true},{ico:"💦",nome:"Urinou"},
-  {ico:"💩",nome:"Defecou"},{ico:"🚶",nome:"Caminhando",dur:true},{ico:"🤜",nome:"Interação social"},
+  {ico:"💩",nome:"Defecou"},{ico:"🚶",nome:"Caminhando",dur:true},
+  {ico:"🤜",nome:"Interação social",social:true},
+  {ico:"😤",nome:"Ameaça",social:true},
+  {ico:"🦷",nome:"Morder",social:true},
   {ico:"🪰",nome:"Espantando moscas"},
 ];
 const DEFAULT_ANIMAIS = ["0341","0342","0343"];
@@ -1074,7 +1143,11 @@ function atualizarAvisoEbotoes(){
 }
 
 /* ---------- Grade de comportamentos ---------- */
-function chaveTimer(animal,comp){return (animal||"")+"||"+comp;}
+function chaveTimer(animal,comp,alvo){return (animal||"")+"||"+comp+(alvo?"→"+alvo:"");}
+function timerSocialAtivo(animal,comp){
+  /* retorna a chave do timer social em andamento para este animal+comportamento (qualquer alvo) */
+  return Object.keys(timersAtivos).find(k=>k.startsWith((animal||"")+"||"+comp+"→"));
+}
 function fmtDur(seg){const m=Math.floor(seg/60),s=seg%60;return (m>0?m+"m":"")+pad(s)+"s";}
 
 function renderGrade(){
@@ -1082,7 +1155,7 @@ function renderGrade(){
   g.innerHTML="";
   comps.forEach(c=>{
     const b=document.createElement("button");
-    b.className="btn-comp"+(c.dur?" tipo-dur":"");
+    b.className="btn-comp"+(c.dur?" tipo-dur":"")+(c.social?" social":"");
     b.dataset.nome=c.nome;
     const nA=(contadoresAnimal[animalAtivo]||{})[c.nome]||0;
     const nT=contadoresGeral[c.nome]||0;
@@ -1111,12 +1184,15 @@ function atualizarBadge(btn,nome){
 function atualizarEstadoTimers(){
   document.querySelectorAll(".btn-comp.tipo-dur").forEach(btn=>{
     const nome=btn.dataset.nome;
-    const t=timersAtivos[chaveTimer(animalAtivo,nome)];
+    const isSocial=btn.classList.contains("social");
+    /* para social+dur, busca qualquer timer com esse animal+comportamento (alvo qualquer) */
+    const chave=isSocial?timerSocialAtivo(animalAtivo,nome):chaveTimer(animalAtivo,nome);
+    const t=chave?timersAtivos[chave]:null;
     const crono=btn.querySelector(".crono");
     if(t){
       btn.classList.add("rodando");
       const seg=Math.floor((Date.now()-t.inicio)/1000);
-      if(crono)crono.textContent=fmtDur(seg);
+      if(crono)crono.textContent=fmtDur(seg)+(t.animal_alvo?" →🏷️"+t.animal_alvo:"");
     }else{
       btn.classList.remove("rodando");
       if(crono)crono.textContent="iniciar";
@@ -1130,9 +1206,101 @@ function garantirTick(){
 }
 
 /* ---------- Registrar ---------- */
-async function registrar(c,btn){
-  if(animais.length>0&&!animalAtivo){toast("👆 Selecione um animal primeiro");return;}
+/* --- Modal de seleção do animal alvo (comportamentos sociais) --- */
+document.getElementById("modal-alvo-cancel").onclick=()=>{
+  document.getElementById("modal-alvo").hidden=true;
+};
+function mostrarModalAlvo(c,btn,callback){
+  const outros=animais.filter(a=>a!==animalAtivo);
+  if(!outros.length){toast("Cadastre ao menos 2 animais para interações sociais");return;}
+  const titulo=document.getElementById("modal-alvo-titulo");
+  titulo.textContent=`${c.ico} ${c.nome} — quem sofre a ação?`;
+  const chips=document.getElementById("modal-alvo-chips");
+  chips.innerHTML="";
+  outros.forEach(a=>{
+    const b=document.createElement("button");
+    b.className="alvo-chip";
+    b.textContent="🏷️ "+a;
+    b.onclick=()=>{
+      document.getElementById("modal-alvo").hidden=true;
+      callback(a);
+    };
+    chips.appendChild(b);
+  });
+  document.getElementById("modal-alvo").hidden=false;
+}
 
+async function registrar(c,btn){
+  if(animais.length>0&&!animalAtivo){toast("👆 Selecione o animal originador primeiro");return;}
+
+  /* ── Comportamento SOCIAL ───────────────────────────────── */
+  if(c.social){
+    if(c.dur){
+      /* social + duração: verifica se já há timer rodando → para; senão → pede alvo → inicia */
+      const chAtivo=timerSocialAtivo(animalAtivo,c.nome);
+      if(chAtivo){
+        /* PARAR timer social */
+        const ativo=timersAtivos[chAtivo];
+        const ini=new Date(ativo.inicio),fim=agora();
+        const durSeg=Math.max(1,Math.round((fim-ini)/1000));
+        delete timersAtivos[chAtivo];
+        salvarConfig("timersAtivos",timersAtivos);
+        const reg={
+          observador:ativo.observador||"",animal:ativo.animal,animal_alvo:ativo.animal_alvo||"",
+          comportamento:c.nome,icone:c.ico,
+          data:dataBR(ini),hora:horaHMS(ini),iso:isoLocal(ini),
+          hora_fim:horaHMS(fim),iso_fim:isoLocal(fim),duracao_seg:durSeg,
+          timestamp:ini.getTime(),tipo:"duracao",audio:null
+        };
+        await addRegistro(reg);
+        contadoresGeral[c.nome]=(contadoresGeral[c.nome]||0)+1;
+        if(ativo.animal){
+          contadoresAnimal[ativo.animal]=contadoresAnimal[ativo.animal]||{};
+          contadoresAnimal[ativo.animal][c.nome]=(contadoresAnimal[ativo.animal][c.nome]||0)+1;
+        }
+        if(btn){btn.classList.remove("rodando");btn.classList.remove("flash");void btn.offsetWidth;btn.classList.add("flash");atualizarBadge(btn,c.nome);}
+        if(navigator.vibrate)navigator.vibrate([40,60,40]);
+        toast(`⏹️ ${c.ico} ${c.nome} — ${fmtDur(durSeg)} (${ativo.animal}→${ativo.animal_alvo||"?"})`);
+        renderAnimaisBar();garantirTick();
+        return;
+      }
+      /* INICIAR: pedir alvo */
+      mostrarModalAlvo(c,btn,alvo=>{
+        const ch=chaveTimer(animalAtivo,c.nome,alvo);
+        timersAtivos[ch]={inicio:Date.now(),comp:c.nome,icone:c.ico,
+          animal:animalAtivo||"",animal_alvo:alvo,observador:observador};
+        salvarConfig("timersAtivos",timersAtivos);
+        if(btn)btn.classList.add("rodando");
+        if(navigator.vibrate)navigator.vibrate(60);
+        toast(`▶️ ${c.ico} ${c.nome} · 🏷️${animalAtivo}→🏷️${alvo}`);
+        renderAnimaisBar();garantirTick();atualizarEstadoTimers();
+      });
+      return;
+    }
+    /* social instantâneo: pedir alvo → registrar */
+    mostrarModalAlvo(c,btn,async alvo=>{
+      const d=agora();
+      const reg={
+        observador:observador,animal:animalAtivo||"",animal_alvo:alvo,
+        comportamento:c.nome,icone:c.ico,
+        data:dataBR(d),hora:horaHMS(d),iso:isoLocal(d),
+        hora_fim:"",iso_fim:"",duracao_seg:"",
+        timestamp:d.getTime(),tipo:"botao",audio:null
+      };
+      await addRegistro(reg);
+      contadoresGeral[c.nome]=(contadoresGeral[c.nome]||0)+1;
+      if(animalAtivo){
+        contadoresAnimal[animalAtivo]=contadoresAnimal[animalAtivo]||{};
+        contadoresAnimal[animalAtivo][c.nome]=(contadoresAnimal[animalAtivo][c.nome]||0)+1;
+      }
+      if(btn){btn.classList.remove("flash");void btn.offsetWidth;btn.classList.add("flash");atualizarBadge(btn,c.nome);}
+      if(navigator.vibrate)navigator.vibrate(40);
+      toast(`${c.ico} ${c.nome} · 🏷️${animalAtivo}→🏷️${alvo} — ${reg.hora}`);
+    });
+    return;
+  }
+
+  /* ── Comportamento de DURAÇÃO (individual) ──────────────── */
   if(c.dur){
     const ch=chaveTimer(animalAtivo,c.nome);
     const ativo=timersAtivos[ch];
@@ -1149,7 +1317,7 @@ async function registrar(c,btn){
       delete timersAtivos[ch];
       salvarConfig("timersAtivos",timersAtivos);
       const reg={
-        observador:ativo.observador||"",animal:ativo.animal,comportamento:c.nome,icone:c.ico,
+        observador:ativo.observador||"",animal:ativo.animal,animal_alvo:"",comportamento:c.nome,icone:c.ico,
         data:dataBR(ini),hora:horaHMS(ini),iso:isoLocal(ini),
         hora_fim:horaHMS(fim),iso_fim:isoLocal(fim),duracao_seg:durSeg,
         timestamp:ini.getTime(),tipo:"duracao",audio:null
@@ -1168,9 +1336,10 @@ async function registrar(c,btn){
     return;
   }
 
+  /* ── Comportamento INSTANTÂNEO (individual) ─────────────── */
   const d=agora();
   const reg={
-    observador:observador,animal:animalAtivo||"",comportamento:c.nome,icone:c.ico,
+    observador:observador,animal:animalAtivo||"",animal_alvo:"",comportamento:c.nome,icone:c.ico,
     data:dataBR(d),hora:horaHMS(d),iso:isoLocal(d),
     hora_fim:"",iso_fim:"",duracao_seg:"",
     timestamp:d.getTime(),tipo:"botao",audio:null
@@ -1318,6 +1487,36 @@ async function renderResumo(){
     h+='</div>';
   });
   h+='</div>';
+
+  /* ── Seção 2: Interações Sociais ────────────────────────── */
+  const regSoc=regEvt.filter(r=>r.animal_alvo);
+  if(regSoc.length){
+    const compsSociais=comps.filter(c=>c.social).map(c=>c.nome);
+    /* pares únicos e comportamentos sociais observados */
+    const pares=new Set(),colsSoc=new Set();
+    regSoc.forEach(r=>{pares.add((r.animal||"?")+"→"+(r.animal_alvo));colsSoc.add(r.comportamento);});
+    const listasPares=[...pares].sort();
+    const listaColsSoc=[...colsSoc].sort();
+    const MS={};
+    listasPares.forEach(p=>{MS[p]={};listaColsSoc.forEach(c=>{MS[p][c]=0;});});
+    regSoc.forEach(r=>{
+      const p=(r.animal||"?")+"→"+r.animal_alvo;
+      MS[p][r.comportamento]=(MS[p][r.comportamento]||0)+1;
+    });
+    h+='<h3 style="margin-top:22px">👥 Interações Sociais</h3>';
+    h+='<p class="dica">Origem → Alvo por tipo de comportamento social.</p>';
+    h+='<div style="overflow-x:auto"><table class="tab"><thead><tr><th class="canto">Origem → Alvo</th>';
+    listaColsSoc.forEach(c=>{const ic=(comps.find(x=>x.nome===c)||{}).ico||"";h+=`<th>${ic}<br>${c}</th>`;});
+    h+='<th class="total">Σ</th></tr></thead><tbody>';
+    listasPares.forEach(p=>{
+      let totP=0;
+      h+=`<tr><td class="lbl">🏷️ ${p.replace("→","&nbsp;→&nbsp;🏷️")}</td>`;
+      listaColsSoc.forEach(c=>{const v=MS[p][c]||0;totP+=v;h+=`<td class="${v?'':'v0'}">${v||0}</td>`;});
+      h+=`<td class="total">${totP}</td></tr>`;
+    });
+    h+='</tbody></table></div>';
+  }
+
   el.innerHTML=h;
 }
 
@@ -1365,10 +1564,10 @@ async function exportarCSV(){
   const regs=(await todosRegistros()).sort((a,b)=>a.timestamp-b.timestamp);
   if(!regs.length){toast("Nada para exportar");return;}
   const sep=";";
-  const cab=["Observador","Animal","Comportamento","Data","Hora_inicio","Hora_fim","Duracao_seg","DataHora_ISO","Tipo","Tem_audio"];
+  const cab=["Observador","Animal","Animal_alvo","Comportamento","Data","Hora_inicio","Hora_fim","Duracao_seg","DataHora_ISO","Tipo","Tem_audio"];
   let csv=cab.join(sep)+"\n";
   regs.forEach(r=>{
-    csv+=[r.observador||"",r.animal,r.comportamento,r.data,r.hora,r.hora_fim||"",r.duracao_seg||"",r.iso,r.tipo,r.tipo==="audio"?"sim":"nao"]
+    csv+=[r.observador||"",r.animal,r.animal_alvo||"",r.comportamento,r.data,r.hora,r.hora_fim||"",r.duracao_seg||"",r.iso,r.tipo,r.tipo==="audio"?"sim":"nao"]
       .map(c=>`"${String(c).replace(/"/g,'""')}"`).join(sep)+"\n";
   });
   baixar(new Blob(["﻿"+csv],{type:"text/csv;charset=utf-8;"}),"etograma_"+nomeArquivo()+".csv");
@@ -1393,8 +1592,8 @@ async function baixarAudios(){
 async function exportarXLSX(){
   const regs=(await todosRegistros()).sort((a,b)=>a.timestamp-b.timestamp);
   if(!regs.length){toast("Nada para exportar");return;}
-  const rows1=[["Observador","Animal","Comportamento","Data","Hora_inicio","Hora_fim","Duracao_seg","DataHora_ISO","Tipo","Tem_audio"]];
-  regs.forEach(r=>{rows1.push([r.observador||"",r.animal||"",r.comportamento,r.data,r.hora,r.hora_fim||"",
+  const rows1=[["Observador","Animal","Animal_alvo","Comportamento","Data","Hora_inicio","Hora_fim","Duracao_seg","DataHora_ISO","Tipo","Tem_audio"]];
+  regs.forEach(r=>{rows1.push([r.observador||"",r.animal||"",r.animal_alvo||"",r.comportamento,r.data,r.hora,r.hora_fim||"",
     (r.duracao_seg===""||r.duracao_seg==null)?"":Number(r.duracao_seg),r.iso,r.tipo,r.tipo==="audio"?"sim":"nao"]);});
   const regEvt=regs.filter(r=>r.tipo==="botao"||r.tipo==="duracao");
   const setA=new Set(animais);regEvt.forEach(r=>setA.add(r.animal||"(sem id)"));
@@ -1415,7 +1614,22 @@ async function exportarXLSX(){
   });
   const totRow=["Σ Total"];cols.forEach(c=>{totRow.push(totCol[c]);if(ehDur(c))totRow.push(totT[c]);});
   totRow.push(totG);rows2.push(totRow);
-  const data=buildXlsx([{name:"Registros",rows:rows1},{name:"Resumo",rows:rows2}]);
+  /* Aba 3 — Interações Sociais */
+  const regSoc=regEvt.filter(r=>r.animal_alvo);
+  let rows3=[["Origem","Alvo","Comportamento","Nº Ocorrências","Tempo_total_seg"]];
+  if(regSoc.length){
+    const mSoc={};
+    regSoc.forEach(r=>{
+      const k=`${r.animal||"?"}→${r.animal_alvo}||${r.comportamento}`;
+      if(!mSoc[k])mSoc[k]={orig:r.animal||"?",alvo:r.animal_alvo,comp:r.comportamento,n:0,seg:0};
+      mSoc[k].n++;
+      mSoc[k].seg+=(Number(r.duracao_seg)||0);
+    });
+    Object.values(mSoc).sort((a,b)=>b.n-a.n).forEach(x=>{
+      rows3.push([x.orig,x.alvo,x.comp,x.n,x.seg||""]);
+    });
+  }else{rows3.push(["(sem registros sociais)","","","",""]);}
+  const data=buildXlsx([{name:"Registros",rows:rows1},{name:"Resumo",rows:rows2},{name:"Interacoes Sociais",rows:rows3}]);
   baixar(new Blob([data],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}),"etograma_"+nomeArquivo()+".xlsx");
   toast("✅ XLSX exportado ("+regs.length+" registros)");
 }
@@ -1471,15 +1685,25 @@ function renderCompCfg(){
   const cont=document.getElementById("compLista");cont.innerHTML="";
   comps.forEach((c,i)=>{
     const div=document.createElement("div");div.className="cfg-item cfg-comp";
+    const chkId="soc-"+i;
     div.innerHTML=`<input class="ico-in" value="${c.ico}" maxlength="3">
       <input class="nome-in" value="${c.nome}">
       <select class="tipo-sel"><option value="inst">⚡ Instantâneo</option><option value="dur">⏱ Duração</option></select>
+      <label class="social-toggle${c.social?' ativo':''}" title="Envolve dois animais">
+        <input type="checkbox" id="${chkId}"${c.social?" checked":""}> 👥
+      </label>
       <button>✕</button>`;
-    const icoIn=div.querySelector(".ico-in"),nomeIn=div.querySelector(".nome-in"),tipoSel=div.querySelector(".tipo-sel");
+    const icoIn=div.querySelector(".ico-in"),nomeIn=div.querySelector(".nome-in");
+    const tipoSel=div.querySelector(".tipo-sel"),socChk=div.querySelector("#"+chkId);
     tipoSel.value=c.dur?"dur":"inst";
     icoIn.oninput=()=>{comps[i].ico=icoIn.value;persistirComps();};
     nomeIn.oninput=()=>{comps[i].nome=nomeIn.value;persistirComps();};
     tipoSel.onchange=()=>{comps[i].dur=(tipoSel.value==="dur");persistirComps();};
+    socChk.onchange=()=>{
+      comps[i].social=socChk.checked;
+      div.querySelector(".social-toggle").classList.toggle("ativo",socChk.checked);
+      persistirComps();renderGrade();
+    };
     div.querySelector("button").onclick=()=>{comps.splice(i,1);persistirComps();renderCompCfg();};
     cont.appendChild(div);
   });
@@ -1501,8 +1725,8 @@ function parseCSVComps(txt){
     if(i===0&&/ico|nome/i.test(l))return;
     const cols=l.split(",").map(c=>c.trim().replace(/^["']|["']$/g,""));
     if(cols.length<2||!cols[1])return;
-    res.push({ico:cols[0]||"🐄",nome:cols[1],
-      dur:["sim","s","yes","1","true"].includes((cols[2]||"").toLowerCase())});
+    const sim=v=>["sim","s","yes","1","true"].includes((v||"").toLowerCase());
+    res.push({ico:cols[0]||"🐄",nome:cols[1],dur:sim(cols[2]),social:sim(cols[3])});
   });
   return res;
 }
