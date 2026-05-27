@@ -1,0 +1,14 @@
+{
+  "name": "Etograma de Campo — Bovinos",
+  "short_name": "Etograma",
+  "description": "Registro de comportamento etológico de bovinos em campo",
+  "start_url": "./etograma.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1a3c1f",
+  "theme_color": "#1a3c1f",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

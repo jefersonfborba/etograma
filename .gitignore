@@ -1,0 +1,37 @@
+
+
+# Secrets
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+
+# Framework AIOX (não vai para o repo público)
+.aiox-core/
+.aiox/
+.claude/
+squads/
+agents/
+docs/
+node_modules/
+
+# Build & Logs
+dist/
+build/
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+.idea/
+*.swp
+
+# Outros arquivos da raiz do projeto AIOX
+AGENTS.md
+.env.example
+core-config.yaml
+package.json
+package-lock.json
+*.cmd
