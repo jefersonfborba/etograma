@@ -816,6 +816,10 @@ table.tab .cel-t {
 body.em-home .nav-bar { display: none; }
 .tab-strip { display: none; } /* navegação via home screen */
 
+/* Animais bar: visível APENAS na tela Registrar */
+.animais-bar { display: none; }
+body.em-registrar .animais-bar { display: flex; }
+
 /* Botão "Início" na action-strip (visível em seções) */
 .btn-inicio {
   flex: 0 0 auto;
@@ -1436,14 +1440,11 @@ document.getElementById("obs-nome").oninput=async e=>{observador=e.target.value;
 function irPara(tab){
   document.querySelectorAll(".painel").forEach(x=>x.classList.remove("ativo"));
   document.getElementById("painel-"+tab).classList.add("ativo");
-  if(tab==="home"){
-    document.body.classList.add("em-home");
-  }else{
-    document.body.classList.remove("em-home");
-    if(tab==="lista"){renderFiltro();renderLista();}
-    if(tab==="resumo")renderResumo();
-    if(tab==="cfg"){document.getElementById("obs-nome").value=observador;renderAnimaisCfg();renderCompCfg();}
-  }
+  document.body.classList.toggle("em-home",      tab==="home");
+  document.body.classList.toggle("em-registrar", tab==="registrar");
+  if(tab==="lista"){renderFiltro();renderLista();}
+  if(tab==="resumo")renderResumo();
+  if(tab==="cfg"){document.getElementById("obs-nome").value=observador;renderAnimaisCfg();renderCompCfg();}
 }
 
 // Cards da home screen
