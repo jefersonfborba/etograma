@@ -1,7 +1,8 @@
-const CACHE = 'etograma-v1';
+const CACHE = 'etograma-v2';
 const ASSETS = [
   './',
   './etograma.html',
+  './etograma-v2.html',
   './manifest.json',
   './icons/icon-192.png',
   './icons/icon-512.png'
