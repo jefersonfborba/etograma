@@ -224,7 +224,40 @@ main{flex:1;padding:0;overflow-y:auto;-webkit-overflow-scrolling:touch;}
 .animais-bar{display:none;}
 body.em-registrar .animais-bar{display:flex;}
 #ham-rec-wrap{display:none;}
-body.em-registrar #ham-rec-wrap{display:block;}
+
+/* Identidade: sem hamburguer */
+body.em-identidade .ham-btn{display:none;}
+
+/* Botão mic na navbar */
+.btn-mic-nav{background:none;border:none;color:var(--text-inverse);font-size:1.4rem;
+  cursor:pointer;padding:var(--sp-1) var(--sp-2);line-height:1;display:none;flex-shrink:0;
+  min-height:var(--touch-min);min-width:var(--touch-min);align-items:center;justify-content:center;
+  border-radius:var(--r-sm);}
+body.em-registrar .btn-mic-nav{display:flex;}
+body.gravando-audio .btn-mic-nav{color:#ff9999;animation:pulse 1s infinite;}
+
+/* Botão mestre com derivado ativo */
+.btn-comp.rodando-der{outline:3px dashed rgba(255,200,100,.9);outline-offset:-3px;
+  animation:pulseDurDer 1.4s infinite;}
+@keyframes pulseDurDer{0%,100%{box-shadow:var(--shadow-md)}
+  50%{box-shadow:0 0 0 5px rgba(255,180,0,.3),var(--shadow-md)}}
+
+/* Chip derivado ativo no modal */
+.alvo-chip.ativo-timer{font-weight:var(--fw-black);}
+
+/* Etiqueta do animal em vertical */
+.chip-animal .tag-ico{display:inline-block;transform:rotate(90deg);font-size:.8em;
+  margin-right:2px;vertical-align:middle;line-height:1;}
+
+/* Card edição de projeto */
+.proj-card-edit{background:var(--bg-page);border:1px solid var(--border-default);
+  border-radius:var(--r-sm);padding:0 var(--sp-3);font-size:var(--fs-sm);
+  cursor:pointer;color:var(--text-secondary);min-height:var(--touch-min);
+  min-width:44px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.proj-card-edit:active{background:var(--bg-accent-lt);}
+.proj-card.desabilitado{opacity:.5;}
+.proj-card.desabilitado .proj-card-nome::after{content:" (inativo)";color:var(--text-muted);
+  font-size:var(--fs-xs);font-weight:var(--fw-regular);}
 
 /* MENU SANDUÍCHE */
 .ham-btn{background:none;border:none;color:var(--text-inverse);font-size:1.7rem;
@@ -333,8 +366,8 @@ table.tab .cel-t{color:var(--bg-duration);font-size:var(--fs-2xs);font-weight:va
   align-items:center;justify-content:center;font-size:var(--fs-sm);font-weight:var(--fw-black);
   cursor:pointer;padding:0;}
 .sec-btn.add{background:var(--bg-primary);color:var(--text-inverse);}
-.sec-btn.imp{background:var(--bg-page);color:var(--text-secondary);border:1px solid var(--border-default);font-size:var(--fs-xs);}
-.sec-btn.exp{background:var(--bg-page);color:var(--bg-duration);border:1px solid var(--border-default);font-size:var(--fs-xs);}
+.sec-btn.imp{background:var(--bg-page);color:var(--text-secondary);border:2px solid var(--border-default);}
+.sec-btn.exp{background:var(--bg-page);color:var(--bg-duration);border:2px solid var(--border-default);}
 .sec-body{padding:var(--sp-3) var(--sp-4) var(--sp-4);}
 
 /* B-ROW comportamento em cfg */
@@ -531,6 +564,7 @@ table.tab .cel-t{color:var(--bg-duration);font-size:var(--fs-2xs);font-weight:va
     <button class="ham-btn" id="hamBtn">☰</button>
     <span class="ham-rec-dot"></span>
     <h1>🐂 Etograma</h1>
+    <button class="btn-mic-nav" id="btnMicNav" title="Gravar áudio">🎙️</button>
     <div class="relogio" id="relogio">--:--:--</div>
   </div>
   <div id="projetoNome" class="projeto-badge"></div>
@@ -609,8 +643,8 @@ table.tab .cel-t{color:var(--bg-duration);font-size:var(--fs-2xs);font-weight:va
       </div>
       <div class="sec-spacer"></div>
       <div class="sec-actions">
-        <button class="sec-btn add" id="btnAddAnimal" title="Adicionar animal">＋</button>
-        <button class="sec-btn imp" id="btnImpAnimais" title="Importar CSV">⬆</button>
+        <button class="sec-btn add" id="btnAddAnimal" title="Adicionar animal"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+        <button class="sec-btn imp" id="btnImpAnimais" title="Importar CSV"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></button>
       </div>
     </div>
     <div class="sec-body">
@@ -628,7 +662,7 @@ table.tab .cel-t{color:var(--bg-duration);font-size:var(--fs-2xs);font-weight:va
       </div>
       <div class="sec-spacer"></div>
       <div class="sec-actions">
-        <button class="sec-btn add" id="btnAddGrupo" title="Adicionar grupo">＋</button>
+        <button class="sec-btn add" id="btnAddGrupo" title="Adicionar grupo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
       </div>
     </div>
     <div class="sec-body">
@@ -645,9 +679,9 @@ table.tab .cel-t{color:var(--bg-duration);font-size:var(--fs-2xs);font-weight:va
       </div>
       <div class="sec-spacer"></div>
       <div class="sec-actions">
-        <button class="sec-btn add" id="btnAddComp" title="Adicionar comportamento">＋</button>
-        <button class="sec-btn imp" id="btnImpComps" title="Importar">⬆</button>
-        <button class="sec-btn exp" id="btnExpComps" title="Exportar">⬇</button>
+        <button class="sec-btn add" id="btnAddComp" title="Adicionar comportamento"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+        <button class="sec-btn imp" id="btnImpComps" title="Importar"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></button>
+        <button class="sec-btn exp" id="btnExpComps" title="Exportar"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
       </div>
     </div>
     <div class="sec-body">
@@ -801,6 +835,29 @@ table.tab .cel-t{color:var(--bg-duration);font-size:var(--fs-2xs);font-weight:va
       <button class="btn-ok btn-subst" id="modal-import-subst">🗑️ Substituir tudo</button>
       <button class="btn-ok btn-mesclar" id="modal-import-mesclar">➕ Mesclar</button>
       <button class="btn-cancel" id="modal-import-cancel">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL editar projeto -->
+<div id="modal-editar-proj" class="modal-overlay" hidden>
+  <div class="modal-box">
+    <p style="margin-bottom:var(--sp-4)">Editar Projeto</p>
+    <label class="modal-label">Nome</label>
+    <input id="edit-proj-nome" class="modal-input" type="text" maxlength="60">
+    <label class="modal-label">Descrição (opcional)</label>
+    <input id="edit-proj-desc" class="modal-input" type="text" maxlength="120">
+    <div style="display:flex;align-items:center;gap:var(--sp-3);margin-bottom:var(--sp-4);cursor:pointer;background:var(--bg-page);border-radius:var(--r-sm);padding:var(--sp-3) var(--sp-4);" id="edit-proj-status-row" onclick="editProjToggleStatus()">
+      <div style="flex:1">
+        <div style="font-size:var(--fs-xs);font-weight:var(--fw-bold);color:var(--text-primary)">Projeto ativo</div>
+        <div style="font-size:var(--fs-2xs);color:var(--text-secondary)">Desabilitar oculta o projeto da lista principal</div>
+      </div>
+      <div class="toggle-pill" id="edit-proj-status-toggle"></div>
+    </div>
+    <div class="modal-btns" style="flex-direction:column;gap:var(--sp-2)">
+      <button class="btn-ok" id="edit-proj-salvar" style="background:var(--bg-primary)">Salvar alterações</button>
+      <button class="btn-ok" id="edit-proj-excluir" style="background:var(--bg-danger)">🗑️ Excluir projeto</button>
+      <button class="btn-cancel" id="edit-proj-cancel">Cancelar</button>
     </div>
   </div>
 </div>
@@ -1026,9 +1083,13 @@ async function renderProjetos() {
   const todosRegs = await storeGetAll("registros");
   const contsPorProj = {};
   todosRegs.forEach(r => { if(r.projeto_id) contsPorProj[r.projeto_id] = (contsPorProj[r.projeto_id]||0)+1; });
-  projetos.forEach(p => {
+  const projetosOrd = [...projetos].sort((a,b) => {
+    if (!!a.desabilitado !== !!b.desabilitado) return a.desabilitado ? 1 : -1;
+    return 0;
+  });
+  projetosOrd.forEach(p => {
     const card = document.createElement("div");
-    card.className = "proj-card";
+    card.className = "proj-card"+(p.desabilitado?" desabilitado":"");
     const totalRegs = contsPorProj[p.id] || 0;
     const ultimoAcesso = p.ultimo_acesso ? fmtDataHora(p.ultimo_acesso) : "–";
     card.innerHTML = `
@@ -1038,8 +1099,10 @@ async function renderProjetos() {
         <div class="proj-card-meta">🏷️ ${(p.animais||[]).length} animal(is) · 📋 ${totalRegs} registro(s)</div>
         <div class="proj-card-meta">🕐 ${ultimoAcesso}</div>
       </div>
-      <span class="proj-card-chevron">›</span>`;
-    card.onclick = () => entrarProjeto(p.id);
+      <button class="proj-card-edit" title="Editar projeto">✏️</button>
+      <span class="proj-card-chevron" style="${p.desabilitado?"opacity:.3":""}">›</span>`;
+    card.querySelector(".proj-card-edit").onclick = (e) => { e.stopPropagation(); editarProjeto(p.id); };
+    if (!p.desabilitado) card.onclick = () => entrarProjeto(p.id);
     lista.appendChild(card);
   });
 }
@@ -1064,6 +1127,52 @@ document.getElementById("modal-proj-ok").onclick = async () => {
   const p = projetos.find(x=>x.id===id);
   if (p) entrarProjeto(p.id);
 };
+/* ─── EDITAR PROJETO ────────────────────────────────────────── */
+let _editProjId = null;
+function editarProjeto(id) {
+  _editProjId = id;
+  const p = projetos.find(x=>x.id===id);
+  if (!p) return;
+  document.getElementById("edit-proj-nome").value = p.nome;
+  document.getElementById("edit-proj-desc").value = p.descricao || "";
+  document.getElementById("edit-proj-status-toggle").classList.toggle("on", !p.desabilitado);
+  document.getElementById("modal-editar-proj").hidden = false;
+  setTimeout(()=>document.getElementById("edit-proj-nome").focus(), 100);
+}
+function editProjToggleStatus() {
+  document.getElementById("edit-proj-status-toggle").classList.toggle("on");
+}
+document.getElementById("edit-proj-cancel").onclick = () => {
+  document.getElementById("modal-editar-proj").hidden = true;
+};
+document.getElementById("edit-proj-salvar").onclick = async () => {
+  const nome = document.getElementById("edit-proj-nome").value.trim();
+  if (!nome) { toast("Digite o nome do projeto"); return; }
+  const desc = document.getElementById("edit-proj-desc").value.trim();
+  const ativo = document.getElementById("edit-proj-status-toggle").classList.contains("on");
+  const p = projetos.find(x=>x.id===_editProjId);
+  if (!p) return;
+  p.nome = nome; p.descricao = desc; p.desabilitado = !ativo;
+  await storePut("projetos", p);
+  projetos = await storeGetAll("projetos");
+  document.getElementById("modal-editar-proj").hidden = true;
+  renderProjetos();
+  toast("✅ Projeto atualizado");
+};
+document.getElementById("edit-proj-excluir").onclick = () => {
+  const p = projetos.find(x=>x.id===_editProjId);
+  if (!p) return;
+  confirmar("Excluir projeto '"+p.nome+"'? Todos os registros serão apagados.", async () => {
+    document.getElementById("modal-editar-proj").hidden = true;
+    const all = await storeGetAll("registros");
+    for (const r of all.filter(r=>r.projeto_id===_editProjId)) await storeDel("registros", r.id);
+    await storeDel("projetos", _editProjId);
+    projetos = await storeGetAll("projetos");
+    renderProjetos();
+    toast("Projeto excluído");
+  });
+};
+
 function voltarParaProjetos() {
   projetoAtivo = null;
   document.getElementById("projetoNome").textContent = "";
@@ -1109,7 +1218,7 @@ function renderAnimaisBar() {
     const temTimer = Object.keys(timersAtivos).some(k=>k.startsWith(a+"||"));
     const b = document.createElement("button");
     b.className = "chip-animal"+(a===animalAtivo?" ativo":"");
-    b.innerHTML = "🏷️ "+a+(temTimer?'<span class="chip-timer-dot"></span>':"");
+    b.innerHTML = '<span class="tag-ico">🏷️</span>'+a+(temTimer?'<span class="chip-timer-dot"></span>':"");
     b.onclick = () => {
       animalAtivo = a;
       salvarConfig("animalAtivo_"+projetoAtivo.id, a);
@@ -1137,46 +1246,71 @@ function renderGrade() {
   container.innerHTML = "";
   const gruposOrd = [...grupos].sort((a,b)=>a.nivel-b.nivel);
   const mestres = comportamentos.filter(c=>c.mestre_id===null);
+
+  // Calcular nº de colunas disponíveis
+  const colMin = 148, gap = 12;
+  const availW = Math.max(148, (document.getElementById("painel-registrar").clientWidth||window.innerWidth) - 24);
+  const numCols = Math.max(1, Math.floor((availW + gap) / (colMin + gap)));
+
+  // Agrupar grupos em "linhas" visuais
+  const linhas = [];
+  let linhaAtual = [], colsUsadas = 0;
   gruposOrd.forEach(grupo => {
     const compsGrupo = mestres.filter(c=>c.grupo_id===grupo.id);
     if (!compsGrupo.length) return;
+    if (linhaAtual.length > 0 && colsUsadas + compsGrupo.length <= numCols) {
+      linhaAtual.push({grupo, comps: compsGrupo});
+      colsUsadas += compsGrupo.length;
+    } else {
+      if (linhaAtual.length) linhas.push(linhaAtual);
+      linhaAtual = [{grupo, comps: compsGrupo}];
+      colsUsadas = compsGrupo.length;
+    }
+  });
+  if (linhaAtual.length) linhas.push(linhaAtual);
+
+  // Renderizar cada linha como um bloco grade
+  linhas.forEach(linha => {
     const section = document.createElement("div");
     section.className = "grupo-section";
-    /* descrição do grupo — comentado para novo layout sem rótulos de grupo
-    const hdr = document.createElement("div");
-    hdr.className = "grupo-header";
-    hdr.innerHTML = `<span class="grupo-dot" style="background:${grupo.cor}"></span><span class="grupo-nome-hdr">${grupo.nome}</span>`;
-    section.appendChild(hdr);
-    */
     const grade = document.createElement("div");
     grade.className = "grade";
-    compsGrupo.forEach(c => {
-      const derivados = derivadosDe(c);
-      const nA = (contadoresAnimal[animalAtivo]||{})[c.nome]||0;
-      const nT = contadoresGeral[c.nome]||0;
-      const btn = document.createElement("button");
-      btn.className = "btn-comp"+(c.tipo==="dur"?" tipo-dur":"")+(c.social?" social":"");
-      btn.dataset.nome = c.nome;
-      btn.dataset.id   = c.id;
-      btn.style.backgroundColor = grupo.cor;
-      btn.style.color = textoCor(grupo.cor);
-      const flagTipo = c.tipo==="dur"?"⏱":"⚡";
-      const flagSoc  = c.social?'<span class="flag-soc">👥</span>':"";
-      const flagDer  = derivados.length?'<span class="flag-der">▼</span>':"";
-      const rodape = c.tipo==="dur"
-        ? `<span class="cont-total dur"><span class="crono">iniciar</span></span>`
-        : `<span class="cont-total">total: <b>${nT}</b></span>`;
-      btn.innerHTML = `
-        <span class="btn-flags"><span class="flag-tipo">${flagTipo}</span>${flagSoc}${flagDer}</span>
-        <span class="cont-animal ${nA?"":"zero"}"><span class="num">${nA}</span></span>
-        <span class="nome">${c.nome}</span>
-        ${rodape}`;
-      if (derivados.length) {
-        btn.onclick = () => mostrarModalDerivados(c, derivados, btn);
-      } else {
-        btn.onclick = () => registrar(c, btn);
-      }
-      grade.appendChild(btn);
+    linha.forEach(({grupo, comps}) => {
+      comps.forEach(c => {
+        const derivados = derivadosDe(c);
+        const nA = (contadoresAnimal[animalAtivo]||{})[c.nome]||0;
+        const nT = contadoresGeral[c.nome]||0;
+        const btn = document.createElement("button");
+        btn.className = "btn-comp"+(c.tipo==="dur"?" tipo-dur":"")+(c.social?" social":"");
+        btn.dataset.nome = c.nome;
+        btn.dataset.id   = c.id;
+        btn.style.backgroundColor = grupo.cor;
+        btn.style.color = textoCor(grupo.cor);
+        // Mestres com derivados: só ícone ▼ (sem ⏱/⚡/👥)
+        // Mestres sem derivados: ícones tipo + social normais
+        let flags;
+        if (derivados.length) {
+          flags = `<span class="btn-flags"><span class="flag-der" style="font-size:1.2rem">▼</span></span>`;
+        } else {
+          const flagTipo = c.tipo==="dur"?"⏱":"⚡";
+          const flagSoc  = c.social?'<span class="flag-soc">👥</span>':"";
+          flags = `<span class="btn-flags"><span class="flag-tipo">${flagTipo}</span>${flagSoc}</span>`;
+        }
+        const rodape = c.tipo==="dur"
+          ? `<span class="cont-total dur"><span class="crono">iniciar</span></span>`
+          : `<span class="cont-total">total: <b>${nT}</b></span>`;
+        btn.innerHTML = `
+          ${flags}
+          <span class="cont-animal ${nA?"":"zero"}"><span class="num">${nA}</span></span>
+          <span class="nome">${c.nome}</span>
+          ${rodape}`;
+        if (derivados.length) {
+          btn.onclick = () => mostrarModalDerivados(c, derivados, btn);
+        } else {
+          btn.onclick = () => registrar(c, btn);
+        }
+        grade.appendChild(btn);
+      });
     });
     section.appendChild(grade);
     container.appendChild(section);
@@ -1196,19 +1330,37 @@ function atualizarBadge(btn, nome) {
 }
 
 function atualizarEstadoTimers() {
-  document.querySelectorAll(".btn-comp.tipo-dur").forEach(btn => {
+  document.querySelectorAll(".btn-comp").forEach(btn => {
     const nome = btn.dataset.nome;
     const isSocial = btn.classList.contains("social");
-    const chave = isSocial ? timerSocialAtivo(animalAtivo,nome) : chaveTimer(animalAtivo,nome);
-    const t = chave ? timersAtivos[chave] : null;
-    const crono = btn.querySelector(".crono");
-    if (t) {
-      btn.classList.add("rodando");
-      const seg = Math.floor((Date.now()-t.inicio)/1000);
-      if (crono) crono.textContent = fmtDur(seg)+(t.animal_alvo?" →🏷️"+t.animal_alvo:"");
-    } else {
-      btn.classList.remove("rodando");
-      if (crono) crono.textContent = "iniciar";
+    const comp = comportamentos.find(c=>c.nome===nome);
+
+    // Botão mestre: sinalizar se algum derivado de duração está rodando
+    if (comp) {
+      const derivados = derivadosDe(comp);
+      if (derivados.length) {
+        const temDerivavoAtivo = derivados.some(d => {
+          if (d.tipo !== "dur") return false;
+          const chD = d.social ? timerSocialAtivo(animalAtivo, d.nome) : chaveTimer(animalAtivo, d.nome);
+          return !!(chD && timersAtivos[chD]);
+        });
+        btn.classList.toggle("rodando-der", temDerivavoAtivo);
+      }
+    }
+
+    // Timer próprio (tipo-dur sem derivados)
+    if (btn.classList.contains("tipo-dur")) {
+      const chave = isSocial ? timerSocialAtivo(animalAtivo,nome) : chaveTimer(animalAtivo,nome);
+      const t = chave ? timersAtivos[chave] : null;
+      const crono = btn.querySelector(".crono");
+      if (t) {
+        btn.classList.add("rodando");
+        const seg = Math.floor((Date.now()-t.inicio)/1000);
+        if (crono) crono.textContent = fmtDur(seg)+(t.animal_alvo?" →🏷️"+t.animal_alvo:"");
+      } else {
+        btn.classList.remove("rodando");
+        if (crono) crono.textContent = "iniciar";
+      }
     }
   });
 }
@@ -1227,10 +1379,23 @@ function mostrarModalDerivados(mestre, derivados, btnMestre) {
   document.getElementById("modal-der-titulo").textContent = mestre.nome+" — qual especificamente?";
   const chips = document.getElementById("modal-der-chips");
   chips.innerHTML = "";
+  const grupo = grupos.find(g=>g.id===mestre.grupo_id);
   derivados.forEach(d => {
     const b = document.createElement("button");
     b.className = "alvo-chip";
-    b.textContent = d.nome;
+    // Cor do grupo
+    if (grupo) {
+      b.style.backgroundColor = grupo.cor;
+      b.style.color = textoCor(grupo.cor);
+      b.style.borderColor = grupo.cor;
+    }
+    // Verificar se está ativo
+    const chD = d.tipo==="dur" ? (d.social ? timerSocialAtivo(animalAtivo,d.nome) : chaveTimer(animalAtivo,d.nome)) : null;
+    const estaAtivo = chD && timersAtivos[chD];
+    if (estaAtivo) b.classList.add("ativo-timer");
+    const flagTipo = d.tipo==="dur" ? "⏱" : "⚡";
+    const flagSoc  = d.social ? " 👥" : "";
+    b.innerHTML = `<span style="font-size:.85em;margin-right:3px">${flagTipo}</span>${d.nome}${flagSoc}${estaAtivo?'<span class="chip-timer-dot" style="margin-left:5px"></span>':""}`;
     b.onclick = () => { document.getElementById("modal-derivados").hidden=true; registrar(d, btnMestre); };
     chips.appendChild(b);
   });
@@ -1369,6 +1534,10 @@ async function registrar(c, btn) {
 /* ─── ÁUDIO ─────────────────────────────────────────────────── */
 let mediaRec=null, chunks=[], gravando=false;
 const btnRec = document.getElementById("btnRec");
+function sincMicNav() {
+  const nav=document.getElementById("btnMicNav");
+  if(nav) nav.textContent = gravando ? "⏹️" : "🎙️";
+}
 btnRec.onclick = async () => {
   if (!gravando) {
     try {
@@ -1379,7 +1548,6 @@ btnRec.onclick = async () => {
         const blob = new Blob(chunks,{type:mediaRec.mimeType||"audio/webm"});
         stream.getTracks().forEach(t=>t.stop());
         const d=agora();
-        const obs=nomeSeguro(observador), an=nomeSeguro(animalAtivo||"sem-id");
         await addRegistro({observador,animal:animalAtivo||"",animal_alvo:"",
           comportamento:"(áudio)",data:dataBR(d),hora:horaHMS(d),iso:isoLocal(d),
           timestamp:d.getTime(),tipo:"audio",audio:blob,projeto_id:projetoAtivo.id});
@@ -1389,16 +1557,17 @@ btnRec.onclick = async () => {
       mediaRec.start(); gravando=true; btnRec.classList.add("gravando");
       document.body.classList.add("gravando-audio");
       document.getElementById("recLabel").textContent="Parar gravação";
-      fecharHam();
+      sincMicNav(); fecharHam();
       if (navigator.vibrate) navigator.vibrate(60);
     } catch(err) { toast("⚠️ Sem acesso ao microfone"); }
   } else {
     mediaRec.stop(); gravando=false; btnRec.classList.remove("gravando");
     document.body.classList.remove("gravando-audio");
     document.getElementById("recLabel").textContent="Gravar áudio";
-    fecharHam();
+    sincMicNav(); fecharHam();
   }
 };
+document.getElementById("btnMicNav").onclick = () => btnRec.click();
 
 /* ─── LISTA DE REGISTROS ────────────────────────────────────── */
 function renderFiltro() {
@@ -1661,6 +1830,10 @@ async function persistirAnimais() {
 document.getElementById("btnAddAnimal").onclick=()=>{
   let nome="novo",n=2; while(animais.includes(nome))nome="novo-"+n++;
   animais.push(nome); persistirAnimais(); renderAnimaisCfg();
+  requestAnimationFrame(()=>{
+    const chips=document.querySelectorAll("#animaisLista .chip-cfg");
+    if(chips.length){const inp=chips[chips.length-1].querySelector("input");if(inp){inp.focus();inp.select();}}
+  });
 };
 document.getElementById("btnImpAnimais").onclick=()=>document.getElementById("fileAnimais").click();
 
