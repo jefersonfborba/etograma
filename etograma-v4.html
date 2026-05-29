@@ -77,7 +77,7 @@ header h1{font-size:1.7rem;margin:0;font-weight:var(--fw-black);letter-spacing:.
   cursor:pointer;white-space:nowrap;transition:.12s;display:inline-flex;align-items:center;}
 .chip-animal.ativo{background:var(--bg-accent-lt);color:var(--text-primary);
   border-color:#fff;transform:scale(1.04);}
-.chip-animal.ativo.timer-ativo{border-color:#ff5c5c;box-shadow:0 0 0 2px #ff5c5c;}
+.chip-animal.timer-ativo{border-color:#ff5c5c;box-shadow:0 0 0 2px #ff5c5c;}
 .sem-animal{font-size:var(--fs-xs);color:var(--text-header-sub);padding:var(--sp-2) 2px;font-style:italic;}
 .chip-timer-dot{display:inline-block;width:8px;height:8px;border-radius:50%;
   background:#ff5c5c;margin-left:5px;vertical-align:middle;animation:pulse-chip 1s infinite;}
@@ -250,7 +250,7 @@ body.gravando-audio .btn-mic-nav{background:var(--bg-record);animation:pulse 1s 
   50%{box-shadow:0 0 0 5px rgba(255,180,0,.3),var(--shadow-md)}}
 
 /* Chip derivado ativo no modal */
-.alvo-chip.ativo-timer{font-weight:var(--fw-black);}
+.alvo-chip.ativo-timer{font-weight:var(--fw-black);background:rgba(255,92,92,.2);border-color:#ff5c5c;}
 
 /* Etiqueta do animal em vertical */
 .chip-animal .tag-ico{display:inline-block;transform:rotate(90deg);font-size:.8em;
@@ -363,10 +363,10 @@ table.tab .cel-t{color:var(--bg-duration);font-size:var(--fs-2xs);font-weight:va
 .sec-header{display:flex;align-items:center;gap:var(--sp-1);padding:var(--sp-2) var(--sp-4);
   border-bottom:1px solid var(--border-light);}
 .sec-title-group{display:flex;align-items:center;gap:var(--sp-1);}
-.sec-title{font-size:var(--fs-2xs);font-weight:var(--fw-black);letter-spacing:.8px;
+.sec-title{font-size:var(--fs-xs);font-weight:var(--fw-black);letter-spacing:.8px;
   text-transform:uppercase;color:var(--bg-primary);white-space:nowrap;}
 .sec-badge{background:rgba(26,60,31,.18);color:var(--bg-primary);border-radius:var(--r-pill);
-  font-size:var(--fs-2xs);font-weight:var(--fw-bold);padding:1px var(--sp-2);white-space:nowrap;}
+  font-size:var(--fs-xs);font-weight:var(--fw-bold);padding:1px var(--sp-2);white-space:nowrap;}
 .sec-spacer{flex:1;}
 .sec-actions{display:flex;gap:var(--sp-2);}
 .sec-btn{width:40px;height:40px;border-radius:var(--r-sm);border:none;display:flex;
@@ -390,8 +390,8 @@ table.tab .cel-t{color:var(--bg-duration);font-size:var(--fs-2xs);font-weight:va
 .b-drag-handle:active{cursor:grabbing;background:var(--border-default);}
 .b-grupo-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
 .b-info{flex:1;min-width:0;}
-.b-nome{font-size:var(--fs-2xs);font-weight:var(--fw-bold);color:var(--text-primary);}
-.b-tipo{font-size:7.5px;color:var(--text-secondary);margin-top:1px;}
+.b-nome{font-size:var(--fs-xs);font-weight:var(--fw-bold);color:var(--text-primary);}
+.b-tipo{font-size:var(--fs-2xs);color:var(--text-secondary);margin-top:1px;}
 .b-del{width:20px;height:20px;border-radius:var(--r-sm);border:none;background:var(--bg-danger);
   color:var(--c-white);font-size:var(--fs-2xs);display:flex;align-items:center;
   justify-content:center;flex-shrink:0;cursor:pointer;padding:12px;
@@ -431,9 +431,11 @@ table.tab .cel-t{color:var(--bg-duration);font-size:var(--fs-2xs);font-weight:va
 .chip-cfg-row{display:flex;flex-wrap:wrap;gap:var(--sp-1);}
 .chip-cfg{background:var(--bg-primary);color:var(--text-inverse);border-radius:var(--r-pill);
   padding:var(--sp-1) var(--sp-3);font-size:var(--fs-2xs);font-weight:var(--fw-black);
-  display:flex;align-items:center;gap:var(--sp-1);border:none;cursor:pointer;user-select:none;}
+  display:flex;align-items:center;gap:var(--sp-1);border:none;cursor:pointer;user-select:none;width:fit-content;}
 .chip-cfg input.brinco-in{background:transparent;border:none;color:inherit;font:inherit;
-  font-weight:var(--fw-black);width:auto;min-width:40px;max-width:100px;outline:none;padding:0;}
+  font-size:var(--fs-xs);font-weight:var(--fw-black);width:auto;min-width:40px;max-width:160px;outline:none;padding:0;}
+.chip-cfg .tag-ico{display:inline-block;transform:rotate(90deg);font-size:.85em;
+  margin-right:2px;vertical-align:middle;line-height:1;}
 .chip-cfg .chip-del{background:rgba(255,255,255,.22);border:none;border-radius:50%;
   width:14px;height:14px;display:flex;align-items:center;justify-content:center;
   font-size:9px;color:var(--text-inverse);cursor:pointer;flex-shrink:0;
@@ -1403,7 +1405,7 @@ function mostrarModalDerivados(mestre, derivados, btnMestre) {
     const flagTipo = d.tipo==="dur" ? "⏱" : "⚡";
     const flagSoc  = d.social ? " 👥" : "";
     b.innerHTML = `<span style="font-size:.85em;margin-right:3px">${flagTipo}</span>${d.nome}${flagSoc}${estaAtivo?'<span class="chip-timer-dot" style="margin-left:5px"></span>':""}`;
-    b.onclick = () => { b.classList.add("clicado"); setTimeout(()=>{ document.getElementById("modal-derivados").hidden=true; registrar(d, btnMestre); },100); };
+    b.onclick = () => { if(!b.classList.contains("ativo-timer")) b.classList.add("clicado"); setTimeout(()=>{ document.getElementById("modal-derivados").hidden=true; registrar(d, btnMestre); },100); };
     chips.appendChild(b);
   });
   document.getElementById("modal-derivados").hidden = false;
@@ -1814,7 +1816,7 @@ function renderAnimaisCfg() {
   cont.innerHTML="";
   animais.forEach((a,i)=>{
     const chip=document.createElement("div"); chip.className="chip-cfg";
-    chip.innerHTML=`🏷️ <input class="brinco-in" value="${a}" maxlength="20"><button class="chip-del" title="Remover">✕</button>`;
+    chip.innerHTML=`<span class="tag-ico">🏷️</span><input class="brinco-in" value="${a}" maxlength="20"><button class="chip-del" title="Remover">✕</button>`;
     const inp=chip.querySelector("input");
     const ajustar=()=>{inp.style.width=Math.max(inp.value.length,4)+"ch";};
     ajustar(); inp.addEventListener("input",ajustar);
