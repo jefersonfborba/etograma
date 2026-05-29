@@ -1321,7 +1321,9 @@ function renderGrade() {
     linha.forEach(({grupo, comps}) => {
       comps.forEach(c => {
         const derivados = derivadosDe(c);
-        const nA = (contadoresAnimal[animalAtivo]||{})[c.nome]||0;
+        const nA = derivados.length
+          ? derivados.reduce((s,d)=>s+((contadoresAnimal[animalAtivo]||{})[d.nome]||0),0)
+          : (contadoresAnimal[animalAtivo]||{})[c.nome]||0;
         const nT = contadoresGeral[c.nome]||0;
         const btn = document.createElement("button");
         btn.className = "btn-comp"+(c.tipo==="dur"?" tipo-dur":"")+(c.social?" social":"");
@@ -1360,12 +1362,16 @@ function renderGrade() {
 
 function atualizarBadge(btn, nome) {
   if (!btn) return;
-  const nA = (contadoresAnimal[animalAtivo]||{})[nome]||0;
-  const nT = contadoresGeral[nome]||0;
+  const mestreNome = btn.dataset.nome;
+  const mestre = mestreNome ? comportamentos.find(c=>c.nome===mestreNome) : null;
+  const ders = mestre ? derivadosDe(mestre) : [];
+  const nA = ders.length
+    ? ders.reduce((s,d)=>s+((contadoresAnimal[animalAtivo]||{})[d.nome]||0),0)
+    : (contadoresAnimal[animalAtivo]||{})[nome]||0;
   const ca = btn.querySelector(".cont-animal");
   if (ca) { ca.querySelector(".num").textContent=nA; ca.classList.toggle("zero",!nA); }
   const tot = btn.querySelector(".cont-total b");
-  if (tot) tot.textContent = nT;
+  if (tot) tot.textContent = nA;
 }
 
 function atualizarEstadoTimers() {
