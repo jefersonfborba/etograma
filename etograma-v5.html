@@ -895,26 +895,62 @@ table.tab .cel-t{color:var(--bg-duration);font-size:var(--fs-2xs);font-weight:va
 
 /* ─── DADOS PADRÃO ─────────────────────────────────────────── */
 const DEFAULT_GRUPOS = [
-  {nome:"Alimentação", descricao:"", nivel:1, cor:"#2d7a3a"},
-  {nome:"Descanso",    descricao:"", nivel:2, cor:"#2a6f8f"},
-  {nome:"Locomoção",   descricao:"", nivel:3, cor:"#8f6a2a"},
-  {nome:"Manutenção",  descricao:"", nivel:4, cor:"#6b2a8f"},
-  {nome:"Social",      descricao:"", nivel:5, cor:"#8f2a2a"},
-  {nome:"Eliminação",  descricao:"", nivel:6, cor:"#4a6b52"},
+  {nome:"Ingestivo / alimentar",          descricao:"", nivel:1, cor:"#2d7a3a"},
+  {nome:"Locomotor / postural",           descricao:"", nivel:2, cor:"#2a6f8f"},
+  {nome:"Social afiliativo",              descricao:"", nivel:3, cor:"#8f6a2a"},
+  {nome:"Social agonístico / agressivo",  descricao:"", nivel:4, cor:"#6b2a8f"},
+  {nome:"Manutenção corporal / conforto", descricao:"", nivel:5, cor:"#8f2a2a"},
+  {nome:"Eliminativo",                    descricao:"", nivel:6, cor:"#4a6b52"},
+  {nome:"Comunicação / vocalização",      descricao:"", nivel:7, cor:"#80ff95"},
+  {nome:"Exploratório / investigativo",   descricao:"", nivel:8, cor:"#f1f45d"},
+  {nome:"Anormal / estereotipado",        descricao:"", nivel:9, cor:"#ff9eea"},
 ];
 const DEFAULT_COMPS_RAW = [
-  {nome:"Pastejando",        tipo:"dur",  social:false, grupo_nome:"Alimentação", mestre_nome:null},
-  {nome:"Ruminando",         tipo:"dur",  social:false, grupo_nome:"Alimentação", mestre_nome:null},
-  {nome:"Bebeu água",        tipo:"inst", social:false, grupo_nome:"Alimentação", mestre_nome:null},
-  {nome:"Deitado",           tipo:"dur",  social:false, grupo_nome:"Descanso",    mestre_nome:null},
-  {nome:"Levantou",          tipo:"inst", social:false, grupo_nome:"Descanso",    mestre_nome:null},
-  {nome:"Caminhando",        tipo:"dur",  social:false, grupo_nome:"Locomoção",   mestre_nome:null},
-  {nome:"Espantando moscas", tipo:"inst", social:false, grupo_nome:"Manutenção",  mestre_nome:null},
-  {nome:"Interação social",  tipo:"inst", social:true,  grupo_nome:"Social",      mestre_nome:null},
-  {nome:"Ameaça",            tipo:"inst", social:true,  grupo_nome:"Social",      mestre_nome:"Interação social"},
-  {nome:"Morder",            tipo:"inst", social:true,  grupo_nome:"Social",      mestre_nome:"Interação social"},
-  {nome:"Urinou",            tipo:"inst", social:false, grupo_nome:"Eliminação",  mestre_nome:null},
-  {nome:"Defecou",           tipo:"inst", social:false, grupo_nome:"Eliminação",  mestre_nome:null},
+  // Ingestivo / alimentar
+  {nome:"Ingestão de água",                tipo:"dur",  social:false, grupo_nome:"Ingestivo / alimentar",          mestre_nome:null},
+  {nome:"Ramoneio",                         tipo:"dur",  social:false, grupo_nome:"Ingestivo / alimentar",          mestre_nome:null},
+  // Locomotor / postural
+  {nome:"Empinar",                          tipo:"inst", social:false, grupo_nome:"Locomotor / postural",           mestre_nome:null},
+  {nome:"Fuga",                             tipo:"dur",  social:false, grupo_nome:"Locomotor / postural",           mestre_nome:null},
+  {nome:"Dormir",                           tipo:"dur",  social:false, grupo_nome:"Locomotor / postural",           mestre_nome:null},
+  // Social afiliativo
+  {nome:"Autocatação mútua / Allogrooming", tipo:"dur",  social:true,  grupo_nome:"Social afiliativo",              mestre_nome:null},
+  {nome:"Contato",                          tipo:"dur",  social:true,  grupo_nome:"Social afiliativo",              mestre_nome:null},
+  {nome:"Brincadeira",                      tipo:"dur",  social:true,  grupo_nome:"Social afiliativo",              mestre_nome:null},
+  // Social agonístico / agressivo
+  {nome:"Deslocar outro animal",            tipo:"inst", social:true,  grupo_nome:"Social agonístico / agressivo",  mestre_nome:null},
+  {nome:"Ameaça",                           tipo:"inst", social:true,  grupo_nome:"Social agonístico / agressivo",  mestre_nome:null},
+  {nome:"Perseguir",                        tipo:"dur",  social:true,  grupo_nome:"Social agonístico / agressivo",  mestre_nome:null},
+  {nome:"Snapping",                         tipo:"inst", social:true,  grupo_nome:"Social agonístico / agressivo",  mestre_nome:null},
+  // Manutenção corporal / conforto
+  {nome:"Coçar em objeto",                  tipo:"dur",  social:false, grupo_nome:"Manutenção corporal / conforto", mestre_nome:null},
+  {nome:"Espojar",                          tipo:"dur",  social:false, grupo_nome:"Manutenção corporal / conforto", mestre_nome:null},
+  {nome:"Bocejar",                          tipo:"inst", social:false, grupo_nome:"Manutenção corporal / conforto", mestre_nome:null},
+  {nome:"Autocatação / Grooming",           tipo:"dur",  social:false, grupo_nome:"Manutenção corporal / conforto", mestre_nome:null},
+  // Eliminativo
+  {nome:"Micção",                           tipo:"inst", social:false, grupo_nome:"Eliminativo",                    mestre_nome:null},
+  {nome:"Defecação",                        tipo:"inst", social:false, grupo_nome:"Eliminativo",                    mestre_nome:null},
+  // Comunicação / vocalização
+  {nome:"Relincho",                         tipo:"inst", social:false, grupo_nome:"Comunicação / vocalização",      mestre_nome:null},
+  {nome:"Guincho",                          tipo:"inst", social:false, grupo_nome:"Comunicação / vocalização",      mestre_nome:null},
+  {nome:"Resfôlego",                        tipo:"inst", social:false, grupo_nome:"Comunicação / vocalização",      mestre_nome:null},
+  // Anormal / estereotipado
+  {nome:"Mastigação não nutritiva",         tipo:"dur",  social:false, grupo_nome:"Anormal / estereotipado",        mestre_nome:null},
+  // Derivados — Social agonístico / agressivo > Ameaça
+  {nome:"Coicear",                          tipo:"inst", social:true,  grupo_nome:"Social agonístico / agressivo",  mestre_nome:"Ameaça"},
+  {nome:"Morder",                           tipo:"inst", social:true,  grupo_nome:"Social agonístico / agressivo",  mestre_nome:"Ameaça"},
+  // Derivados — Social afiliativo > Contato
+  {nome:"Cabeça-corpo",                     tipo:"inst", social:true,  grupo_nome:"Social afiliativo",              mestre_nome:"Contato"},
+  {nome:"Nariz-corpo",                      tipo:"inst", social:true,  grupo_nome:"Social afiliativo",              mestre_nome:"Contato"},
+  {nome:"Nariz-nariz",                      tipo:"inst", social:true,  grupo_nome:"Social afiliativo",              mestre_nome:"Contato"},
+  // Derivados — Social afiliativo > Brincadeira
+  {nome:"Locomotora",                       tipo:"inst", social:true,  grupo_nome:"Social afiliativo",              mestre_nome:"Brincadeira"},
+  {nome:"Luta",                             tipo:"inst", social:true,  grupo_nome:"Social afiliativo",              mestre_nome:"Brincadeira"},
+  {nome:"Objeto",                           tipo:"inst", social:true,  grupo_nome:"Social afiliativo",              mestre_nome:"Brincadeira"},
+  // Derivados — Comunicação / vocalização > Relincho
+  {nome:"Normal",                           tipo:"inst", social:false, grupo_nome:"Comunicação / vocalização",      mestre_nome:"Relincho"},
+  {nome:"Suave",                            tipo:"inst", social:false, grupo_nome:"Comunicação / vocalização",      mestre_nome:"Relincho"},
+  {nome:"Longo",                            tipo:"inst", social:false, grupo_nome:"Comunicação / vocalização",      mestre_nome:"Relincho"},
 ];
 
 /* ─── STATE ────────────────────────────────────────────────── */
@@ -1037,11 +1073,12 @@ function toast(m) {
   const t=document.getElementById("toast"); t.textContent=m; t.classList.add("show");
   clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove("show"),1800);
 }
-function confirmar(msg, cbOk, cbCancel) {
+function confirmar(msg, cbOk, cbCancel, labelOk="Confirmar", labelCancel="Cancelar") {
   const m=document.getElementById("modal-conf");
   document.getElementById("modal-msg").textContent=msg;
   m.hidden=false;
   const ok=document.getElementById("modal-ok"), cancel=document.getElementById("modal-cancel");
+  ok.textContent=labelOk; cancel.textContent=labelCancel;
   const fechar=()=>{m.hidden=true;ok.onclick=null;cancel.onclick=null;m.onclick=null;};
   ok.onclick=()=>{fechar();cbOk();};
   cancel.onclick=()=>{fechar();if(cbCancel)cbCancel();};
@@ -1861,9 +1898,12 @@ function renderAnimaisCfg() {
     });
     chip.querySelector(".chip-del").addEventListener("click",e=>{
       e.stopPropagation();
-      const remId=animais[i].id; animais.splice(i,1);
-      if(animalAtivo===remId)animalAtivo=null;
-      persistirAnimais(); renderAnimaisCfg();
+      confirmar("Remover animal '"+a.nome+"'?", ()=>{
+        const idx=animais.findIndex(x=>x.id===a.id);
+        if(idx>=0)animais.splice(idx,1);
+        if(animalAtivo===a.id)animalAtivo=null;
+        persistirAnimais(); renderAnimaisCfg();
+      });
     });
     cont.appendChild(chip);
   });
@@ -2033,10 +2073,9 @@ document.getElementById("fileGrupos").onchange=function(){
 document.getElementById("btnImpGrupos").onclick=()=>document.getElementById("fileGrupos").click();
 document.getElementById("btnExpGrupos").onclick=()=>{
   confirmar("Exportar grupos como:",
-    ()=>exportarGruposJSON(),()=>exportarGruposCSV()
+    ()=>exportarGruposJSON(),()=>exportarGruposCSV(),
+    "JSON","CSV"
   );
-  document.getElementById("modal-ok").textContent="JSON";
-  document.getElementById("modal-cancel").textContent="CSV";
 };
 
 /* ─── CADASTRO — COMPORTAMENTOS ──────────────────────────────── */
@@ -2276,10 +2315,9 @@ async function aplicarImportComps(parsed, mesclar=false){
 document.getElementById("btnImpComps").onclick=()=>document.getElementById("fileComps").click();
 document.getElementById("btnExpComps").onclick=()=>{
   confirmar("Exportar comportamentos como:",
-    ()=>exportarCompsJSON(),()=>exportarCompsCSV()
+    ()=>exportarCompsJSON(),()=>exportarCompsCSV(),
+    "JSON","CSV"
   );
-  document.getElementById("modal-ok").textContent="JSON";
-  document.getElementById("modal-cancel").textContent="CSV";
 };
 
 /* ─── NAVEGAÇÃO ─────────────────────────────────────────────── */
