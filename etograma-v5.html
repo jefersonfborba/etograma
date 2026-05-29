@@ -201,7 +201,7 @@ main{flex:1;padding:0;overflow-y:auto;-webkit-overflow-scrolling:touch;}
 .cont-total b{font-size:var(--fs-sm);}
 .btn-comp.tipo-dur .cont-total.dur{background:rgba(42,111,143,.7);}
 .btn-comp.tipo-dur .crono{font-variant-numeric:tabular-nums;}
-.btn-comp.rodando{outline:3px solid rgba(255,255,255,.7);outline-offset:-3px;
+.btn-comp.rodando{outline:3px dashed rgba(255,220,0,1);outline-offset:-3px;
   animation:pulseDur 1.4s infinite;}
 .btn-comp.rodando .cont-total.dur{background:rgba(179,64,42,.8);}
 @keyframes pulseDur{0%,100%{box-shadow:var(--shadow-md)}
@@ -240,17 +240,17 @@ body.em-registrar .btn-mic-nav{display:flex;}
 body.gravando-audio .btn-mic-nav{background:var(--bg-record);animation:pulse 1s infinite;}
 
 /* Borda tracejada amarela: feedback de "clicado" */
-.btn-comp.clicado{outline:3px dashed rgba(255,210,0,.95);outline-offset:-3px;}
-.alvo-chip.clicado{outline:3px dashed rgba(255,210,0,.95);outline-offset:-2px;}
+.btn-comp.clicado{outline:3px dashed rgba(255,220,0,1);outline-offset:-3px;}
+.alvo-chip.clicado{outline:3px dashed rgba(255,220,0,1);outline-offset:-2px;}
 
 /* Botão mestre com derivado ativo */
-.btn-comp.rodando-der{outline:3px dashed rgba(255,200,100,.9);outline-offset:-3px;
+.btn-comp.rodando-der{outline:3px dashed rgba(255,220,0,1);outline-offset:-3px;
   animation:pulseDurDer 1.4s infinite;}
 @keyframes pulseDurDer{0%,100%{box-shadow:var(--shadow-md)}
   50%{box-shadow:0 0 0 5px rgba(255,180,0,.3),var(--shadow-md)}}
 
 /* Chip derivado ativo no modal */
-.alvo-chip.ativo-timer{font-weight:var(--fw-black);outline:3px dashed rgba(255,210,0,.95);outline-offset:-2px;animation:pulseDurDer 1.4s infinite;}
+.alvo-chip.ativo-timer{font-weight:var(--fw-black);outline:3px dashed rgba(255,220,0,1);outline-offset:-2px;animation:pulseDurDer 1.4s infinite;}
 
 /* Etiqueta do animal em vertical */
 .chip-animal .tag-ico{display:inline-block;transform:rotate(90deg);font-size:.8em;
@@ -395,7 +395,7 @@ table.tab .cel-t{color:var(--bg-duration);font-size:var(--fs-2xs);font-weight:va
 .b-del{width:20px;height:20px;border-radius:var(--r-sm);border:none;background:var(--bg-danger);
   color:var(--c-white);font-size:var(--fs-2xs);display:flex;align-items:center;
   justify-content:center;flex-shrink:0;cursor:pointer;padding:12px;
-  margin:-12px -12px -12px 0;position:relative;}
+  margin:-12px 0 -12px 0;position:relative;}
 .b-row.b-dragging{opacity:.3;}
 .b-row.b-drag-ghost{opacity:.88;box-shadow:var(--shadow-md);pointer-events:none;
   border-radius:var(--r-sm);position:fixed;z-index:999;}
