@@ -431,13 +431,12 @@ table.tab .cel-t{color:var(--bg-duration);font-size:var(--fs-2xs);font-weight:va
 .chip-cfg{background:var(--bg-primary);color:var(--text-inverse);border-radius:var(--r-pill);
   padding:var(--sp-1) var(--sp-3);font-size:var(--fs-2xs);font-weight:var(--fw-black);
   display:flex;align-items:center;gap:var(--sp-1);border:none;cursor:pointer;user-select:none;width:fit-content;}
-.chip-cfg input.brinco-in{background:transparent;border:none;color:inherit;font:inherit;
-  font-size:var(--fs-xs);font-weight:var(--fw-black);width:auto;min-width:40px;max-width:160px;outline:none;padding:0;}
+.chip-cfg .brinco-nome{font-size:var(--fs-xs);font-weight:var(--fw-black);}
 .chip-cfg .tag-ico{display:inline-block;transform:rotate(90deg);font-size:.85em;
   margin-right:2px;vertical-align:middle;line-height:1;}
-.chip-cfg .chip-del{background:rgba(255,255,255,.22);border:none;border-radius:50%;
-  width:14px;height:14px;display:flex;align-items:center;justify-content:center;
-  font-size:9px;color:var(--text-inverse);cursor:pointer;flex-shrink:0;
+.chip-cfg .chip-edit{background:rgba(255,255,255,.22);border:none;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;color:var(--text-inverse);cursor:pointer;flex-shrink:0;
   padding:9px;margin:-9px;position:relative;}
 
 /* BOTTOM SHEET — comportamento */
@@ -880,6 +879,33 @@ table.tab .cel-t{color:var(--bg-duration);font-size:var(--fs-2xs);font-weight:va
     <div class="modal-btns">
       <button class="btn-cancel" id="modal-cancel">Cancelar</button>
       <button class="btn-ok" id="modal-ok">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL adicionar animal -->
+<div id="modal-animal-add" class="modal-overlay" hidden>
+  <div class="modal-box">
+    <p>Novo animal</p>
+    <label class="modal-label">Identificação</label>
+    <input id="animal-add-inp" class="modal-input" type="text" maxlength="20" placeholder="Ex: Preto, 341, Touro A…">
+    <div class="modal-btns">
+      <button class="btn-cancel" id="animal-add-cancel">Cancelar</button>
+      <button class="btn-ok" id="animal-add-ok" style="background:var(--bg-primary)">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL editar animal -->
+<div id="modal-animal-edit" class="modal-overlay" hidden>
+  <div class="modal-box">
+    <p>Editar animal</p>
+    <label class="modal-label">Identificação</label>
+    <input id="animal-edit-inp" class="modal-input" type="text" maxlength="20">
+    <div class="modal-btns" style="flex-direction:column;gap:var(--sp-2)">
+      <button class="btn-ok" id="animal-edit-salvar" style="background:var(--bg-primary)">Salvar</button>
+      <button class="btn-ok" id="animal-edit-excluir" style="background:var(--bg-danger)">🗑️ Excluir animal</button>
+      <button class="btn-cancel" id="animal-edit-cancel">Cancelar</button>
     </div>
   </div>
 </div>
@@ -1892,27 +1918,12 @@ function atualizarBadgesCfg() {
 function renderAnimaisCfg() {
   const cont=document.getElementById("animaisLista");
   cont.innerHTML="";
-  animais.forEach((a,i)=>{
+  animais.forEach(a=>{
     const chip=document.createElement("div"); chip.className="chip-cfg";
-    chip.innerHTML=`<span class="tag-ico">🏷️</span><input class="brinco-in" value="${a.nome}" maxlength="20"><button class="chip-del" title="Remover">✕</button>`;
-    const inp=chip.querySelector("input");
-    const ajustar=()=>{inp.style.width=Math.max(inp.value.length,4)+"ch";};
-    ajustar(); inp.addEventListener("input",ajustar);
-    inp.addEventListener("change",()=>{
-      const novo=inp.value.trim();
-      if(!novo){inp.value=animais[i].nome;ajustar();return;}
-      if(animais.some((x,j)=>j!==i&&x.nome===novo)){toast("⚠️ Identificação já cadastrada");inp.value=animais[i].nome;ajustar();return;}
-      animais[i].nome=novo;
-      persistirAnimais();
-    });
-    chip.querySelector(".chip-del").addEventListener("click",e=>{
+    chip.innerHTML=`<span class="tag-ico">🏷️</span><span class="brinco-nome">${a.nome}</span><button class="chip-edit" title="Editar">✏️</button>`;
+    chip.querySelector(".chip-edit").addEventListener("click",e=>{
       e.stopPropagation();
-      confirmar("Remover animal '"+a.nome+"'?", ()=>{
-        const idx=animais.findIndex(x=>x.id===a.id);
-        if(idx>=0)animais.splice(idx,1);
-        if(animalAtivo===a.id)animalAtivo=null;
-        persistirAnimais(); renderAnimaisCfg();
-      });
+      abrirModalEditarAnimal(a.id);
     });
     cont.appendChild(chip);
   });
@@ -1924,14 +1935,65 @@ async function persistirAnimais() {
   await salvarConfig("animalAtivo_"+projetoAtivo.id, animalAtivo);
   renderAnimaisBar(); renderFiltro(); await recarregarContadores(); atualizarBadgesCfg();
 }
-document.getElementById("btnAddAnimal").onclick=()=>{
-  let nome="novo",n=2; while(animais.some(a=>a.nome===nome))nome="novo-"+n++;
+document.getElementById("btnAddAnimal").onclick=()=>abrirModalAddAnimal();
+
+/* ─── MODAL ADICIONAR ANIMAL ─────────────────────────────── */
+function abrirModalAddAnimal(){
+  document.getElementById("animal-add-inp").value="";
+  document.getElementById("modal-animal-add").hidden=false;
+  setTimeout(()=>document.getElementById("animal-add-inp").focus(),80);
+}
+document.getElementById("animal-add-cancel").onclick=()=>{
+  document.getElementById("modal-animal-add").hidden=true;
+};
+document.getElementById("animal-add-ok").onclick=()=>{
+  const inp=document.getElementById("animal-add-inp");
+  const nome=inp.value.trim();
+  if(!nome){inp.focus();return;}
+  if(animais.some(a=>a.nome===nome)){toast("⚠️ Identificação já cadastrada");inp.focus();return;}
+  document.getElementById("modal-animal-add").hidden=true;
   animais.push({id:genId(),nome}); persistirAnimais(); renderAnimaisCfg();
-  requestAnimationFrame(()=>{
-    const chips=document.querySelectorAll("#animaisLista .chip-cfg");
-    if(chips.length){const inp=chips[chips.length-1].querySelector("input");if(inp){inp.focus();inp.select();}}
+};
+document.getElementById("animal-add-inp").addEventListener("keydown",e=>{
+  if(e.key==="Enter")document.getElementById("animal-add-ok").click();
+});
+
+/* ─── MODAL EDITAR ANIMAL ────────────────────────────────── */
+let _animalEditId=null;
+function abrirModalEditarAnimal(id){
+  const a=animais.find(x=>x.id===id); if(!a)return;
+  _animalEditId=id;
+  document.getElementById("animal-edit-inp").value=a.nome;
+  document.getElementById("modal-animal-edit").hidden=false;
+  setTimeout(()=>document.getElementById("animal-edit-inp").focus(),80);
+}
+document.getElementById("animal-edit-cancel").onclick=()=>{
+  document.getElementById("modal-animal-edit").hidden=true;
+};
+document.getElementById("animal-edit-salvar").onclick=()=>{
+  const inp=document.getElementById("animal-edit-inp");
+  const nome=inp.value.trim();
+  const idx=animais.findIndex(x=>x.id===_animalEditId);
+  if(!nome){inp.focus();return;}
+  if(animais.some((x,j)=>j!==idx&&x.nome===nome)){toast("⚠️ Identificação já cadastrada");inp.focus();return;}
+  animais[idx].nome=nome;
+  document.getElementById("modal-animal-edit").hidden=true;
+  persistirAnimais(); renderAnimaisCfg();
+};
+document.getElementById("animal-edit-excluir").onclick=()=>{
+  const a=animais.find(x=>x.id===_animalEditId); if(!a)return;
+  document.getElementById("modal-animal-edit").hidden=true;
+  confirmar("Remover animal '"+a.nome+"'?",()=>{
+    const idx=animais.findIndex(x=>x.id===_animalEditId);
+    if(idx>=0)animais.splice(idx,1);
+    if(animalAtivo===_animalEditId)animalAtivo=null;
+    persistirAnimais(); renderAnimaisCfg();
   });
 };
+document.getElementById("animal-edit-inp").addEventListener("keydown",e=>{
+  if(e.key==="Enter")document.getElementById("animal-edit-salvar").click();
+});
+
 document.getElementById("btnImpAnimais").onclick=()=>document.getElementById("fileAnimais").click();
 
 /* ─── CADASTRO — GRUPOS ──────────────────────────────────────── */
