@@ -194,6 +194,13 @@ main{flex:1;padding:0;overflow-y:auto;-webkit-overflow-scrolling:touch;}
   box-shadow:0 1px 3px rgba(0,0,0,.25);}
 .cont-animal.zero .num{background:rgba(0,0,0,.12);color:rgba(255,255,255,.55);}
 
+/* Cronômetro — centro-topo do botão dur, visível só quando rodando */
+.btn-comp.tipo-dur .crono{position:absolute;top:7px;left:50%;transform:translateX(-50%);
+  font-size:var(--fs-2xs);font-weight:var(--fw-black);font-variant-numeric:tabular-nums;
+  background:rgba(0,0,0,.30);color:#fff;padding:2px 7px;border-radius:var(--r-pill);
+  white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s;}
+.btn-comp.tipo-dur.rodando .crono{opacity:1;}
+
 .btn-comp.rodando{outline:3px dashed rgba(255,220,0,1);outline-offset:-3px;
   animation:pulseDur 1.4s infinite;}
 @keyframes pulseDur{0%,100%{box-shadow:var(--shadow-md)}
@@ -1347,6 +1354,7 @@ function renderGrade() {
         }
         btn.innerHTML = `
           ${flags}
+          ${c.tipo==="dur"?'<span class="crono"></span>':""}
           <span class="cont-animal ${nA?"":"zero"}"><span class="num">${nA}</span></span>
           <span class="nome">${c.nome}</span>`;
         if (derivados.length) {
@@ -1408,7 +1416,7 @@ function atualizarEstadoTimers() {
         if (crono) crono.textContent = fmtDur(seg)+(t.animal_alvo_id?" →🏷️"+nomeAnimal(t.animal_alvo_id):"");
       } else {
         btn.classList.remove("rodando");
-        if (crono) crono.textContent = "iniciar";
+        if (crono) crono.textContent = "";
       }
     }
   });
