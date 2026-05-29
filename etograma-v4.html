@@ -58,10 +58,10 @@ header{background:var(--bg-primary);color:var(--text-inverse);
   padding:calc(env(safe-area-inset-top,8px) + 8px) var(--sp-5) var(--sp-2);
   box-shadow:var(--shadow-md);position:relative;z-index:30;flex-shrink:0;}
 .top-linha{display:flex;align-items:center;gap:var(--sp-3);}
-header h1{font-size:var(--fs-sm);margin:0;font-weight:var(--fw-black);letter-spacing:.3px;flex:1;}
-.relogio{font-variant-numeric:tabular-nums;font-weight:var(--fw-black);font-size:var(--fs-sm);
+header h1{font-size:1.7rem;margin:0;font-weight:var(--fw-black);letter-spacing:.3px;flex:1;}
+.relogio{font-variant-numeric:tabular-nums;font-weight:var(--fw-black);font-size:1.5rem;
   background:rgba(0,0,0,.18);padding:var(--sp-1) var(--sp-3);border-radius:var(--r-sm);}
-.projeto-badge{font-size:var(--fs-xs);font-weight:var(--fw-semibold);
+.projeto-badge{font-size:1.3rem;font-weight:var(--fw-semibold);
   color:var(--text-header-sub);margin-top:2px;white-space:nowrap;
   overflow:hidden;text-overflow:ellipsis;display:none;}
 .projeto-badge.vis{display:block;}
@@ -72,11 +72,12 @@ header h1{font-size:var(--fs-sm);margin:0;font-weight:var(--fw-black);letter-spa
 @media(hover:hover){.animais-bar{cursor:grab;}.animais-bar.drag-ativo{cursor:grabbing;}}
 .animais-bar::-webkit-scrollbar{height:0;}
 .chip-animal{flex:0 0 auto;border:2px solid transparent;border-radius:var(--r-pill);
-  padding:var(--sp-2) var(--sp-5);min-height:var(--touch-field);background:rgba(255,255,255,.15);
+  padding:6px 10px;min-height:var(--touch-field);background:rgba(255,255,255,.15);
   color:var(--text-inverse);font-weight:var(--fw-black);font-size:var(--fs-sm);
   cursor:pointer;white-space:nowrap;transition:.12s;display:inline-flex;align-items:center;}
 .chip-animal.ativo{background:var(--bg-accent-lt);color:var(--text-primary);
   border-color:#fff;transform:scale(1.04);}
+.chip-animal.ativo.timer-ativo{border-color:#ff5c5c;box-shadow:0 0 0 2px #ff5c5c;}
 .sem-animal{font-size:var(--fs-xs);color:var(--text-header-sub);padding:var(--sp-2) 2px;font-style:italic;}
 .chip-timer-dot{display:inline-block;width:8px;height:8px;border-radius:50%;
   background:#ff5c5c;margin-left:5px;vertical-align:middle;animation:pulse-chip 1s infinite;}
@@ -146,11 +147,10 @@ main{flex:1;padding:0;overflow-y:auto;-webkit-overflow-scrolling:touch;}
 /* HOME SCREEN */
 #painel-home{flex-direction:column;justify-content:center;padding:0;min-height:100%;}
 #painel-home.ativo{display:flex;}
-.home-topo{text-align:center;padding:var(--sp-8) var(--sp-4) var(--sp-4);
-  color:var(--text-secondary);font-size:var(--fs-xs);font-weight:var(--fw-semibold);}
+.home-topo{display:none;}
 .home-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-4);padding:var(--sp-4);}
 .home-card{border:none;border-radius:var(--r-xl);background:var(--bg-accent);
-  box-shadow:var(--shadow-md);color:var(--text-primary);min-height:150px;
+  box-shadow:var(--shadow-md);color:var(--text-primary);min-height:170px;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   gap:var(--sp-3);cursor:pointer;padding:var(--sp-6);transition:transform .06s ease,filter .15s ease;}
 .home-card:active{transform:scale(.95);filter:brightness(.92);}
@@ -158,7 +158,7 @@ main{flex:1;padding:0;overflow-y:auto;-webkit-overflow-scrolling:touch;}
 .home-card:nth-child(3){background:var(--bg-duration);color:#fff;}
 .home-card:nth-child(4){background:rgba(21,36,15,.12);color:var(--text-primary);
   border:2px solid var(--c-border);box-shadow:var(--shadow-sm);}
-.home-ico{font-size:2.8rem;line-height:1;}
+.home-ico{font-size:3.2rem;line-height:1;}
 .home-lbl{font-size:var(--fs-md);font-weight:var(--fw-black);text-align:center;line-height:var(--lh-tight);}
 
 /* GRADE DE COMPORTAMENTOS */
@@ -229,13 +229,19 @@ body.em-registrar .animais-bar{display:flex;}
 /* Identidade: sem hamburguer */
 body.em-identidade .ham-btn{display:none;}
 
-/* Botão mic na navbar */
-.btn-mic-nav{background:none;border:none;color:var(--text-inverse);font-size:1.4rem;
-  cursor:pointer;padding:var(--sp-1) var(--sp-2);line-height:1;display:none;flex-shrink:0;
-  min-height:var(--touch-min);min-width:var(--touch-min);align-items:center;justify-content:center;
-  border-radius:var(--r-sm);}
+/* Botão mic na navbar — estilo btn-rec compacto */
+.btn-mic-nav{background:var(--bg-primary-dk);border:none;color:var(--text-inverse);
+  cursor:pointer;padding:var(--sp-1) var(--sp-3);line-height:1;display:none;flex-shrink:0;
+  min-height:var(--touch-min);align-items:center;justify-content:center;gap:var(--sp-2);
+  border-radius:var(--r-lg);font-size:var(--fs-xs);font-weight:var(--fw-black);}
+.btn-mic-nav .mic-dot{width:10px;height:10px;border-radius:50%;background:#fff;flex-shrink:0;}
+body.gravando-audio .btn-mic-nav .mic-dot{border-radius:3px;}
 body.em-registrar .btn-mic-nav{display:flex;}
-body.gravando-audio .btn-mic-nav{color:#ff9999;animation:pulse 1s infinite;}
+body.gravando-audio .btn-mic-nav{background:var(--bg-record);animation:pulse 1s infinite;}
+
+/* Borda tracejada amarela: feedback de "clicado" */
+.btn-comp.clicado{outline:3px dashed rgba(255,210,0,.95);outline-offset:-3px;}
+.alvo-chip.clicado{outline:3px dashed rgba(255,210,0,.95);outline-offset:-2px;}
 
 /* Botão mestre com derivado ativo */
 .btn-comp.rodando-der{outline:3px dashed rgba(255,200,100,.9);outline-offset:-3px;
@@ -564,8 +570,8 @@ table.tab .cel-t{color:var(--bg-duration);font-size:var(--fs-2xs);font-weight:va
   <div class="top-linha">
     <button class="ham-btn" id="hamBtn">☰</button>
     <span class="ham-rec-dot"></span>
-    <h1>🐂 Etograma</h1>
-    <button class="btn-mic-nav" id="btnMicNav" title="Gravar áudio">🎙️</button>
+    <h1>Etograma</h1>
+    <button class="btn-mic-nav" id="btnMicNav" title="Gravar áudio"><span class="mic-dot"></span><span class="mic-lbl">REC</span></button>
     <div class="relogio" id="relogio">--:--:--</div>
   </div>
   <div id="projetoNome" class="projeto-badge"></div>
@@ -1218,7 +1224,7 @@ function renderAnimaisBar() {
   animais.forEach(a => {
     const temTimer = Object.keys(timersAtivos).some(k=>k.startsWith(a+"||"));
     const b = document.createElement("button");
-    b.className = "chip-animal"+(a===animalAtivo?" ativo":"");
+    b.className = "chip-animal"+(a===animalAtivo?" ativo":"")+(temTimer?" timer-ativo":"");
     b.innerHTML = '<span class="tag-ico">🏷️</span>'+a+(temTimer?'<span class="chip-timer-dot"></span>':"");
     b.onclick = () => {
       animalAtivo = a;
@@ -1397,7 +1403,7 @@ function mostrarModalDerivados(mestre, derivados, btnMestre) {
     const flagTipo = d.tipo==="dur" ? "⏱" : "⚡";
     const flagSoc  = d.social ? " 👥" : "";
     b.innerHTML = `<span style="font-size:.85em;margin-right:3px">${flagTipo}</span>${d.nome}${flagSoc}${estaAtivo?'<span class="chip-timer-dot" style="margin-left:5px"></span>':""}`;
-    b.onclick = () => { document.getElementById("modal-derivados").hidden=true; registrar(d, btnMestre); };
+    b.onclick = () => { b.classList.add("clicado"); setTimeout(()=>{ document.getElementById("modal-derivados").hidden=true; registrar(d, btnMestre); },100); };
     chips.appendChild(b);
   });
   document.getElementById("modal-derivados").hidden = false;
@@ -1457,7 +1463,7 @@ async function registrar(c, btn) {
           }
         }
         await salvarConfig(chTimers, timersAtivos);
-        if (btn){btn.classList.remove("rodando");btn.classList.remove("flash");void btn.offsetWidth;btn.classList.add("flash");atualizarBadge(btn,c.nome);}
+        if (btn){btn.classList.remove("rodando");btn.classList.remove("flash");btn.classList.remove("clicado");void btn.offsetWidth;btn.classList.add("flash");btn.classList.add("clicado");setTimeout(()=>btn.classList.remove("clicado"),1500);atualizarBadge(btn,c.nome);}
         if (navigator.vibrate) navigator.vibrate([40,60,40]);
         toast("⏹️ "+c.nome+" encerrado");
         renderAnimaisBar(); garantirTick(); atualizarEstadoTimers();
@@ -1483,9 +1489,9 @@ async function registrar(c, btn) {
           comportamento:c.nome,data:dataBR(d),hora:horaHMS(d),iso:isoLocal(d),
           hora_fim:"",iso_fim:"",duracao_seg:"",timestamp:d.getTime(),tipo:"botao",audio:null,projeto_id:projetoAtivo.id});
       }
-      contadoresGeral[c.nome]=(contadoresGeral[c.nome]||0)+alvos.length;
-      if (animalAtivo){contadoresAnimal[animalAtivo]=contadoresAnimal[animalAtivo]||{};contadoresAnimal[animalAtivo][c.nome]=(contadoresAnimal[animalAtivo][c.nome]||0)+alvos.length;}
-      if (btn){btn.classList.remove("flash");void btn.offsetWidth;btn.classList.add("flash");atualizarBadge(btn,c.nome);}
+      contadoresGeral[c.nome]=(contadoresGeral[c.nome]||0)+1;
+      if (animalAtivo){contadoresAnimal[animalAtivo]=contadoresAnimal[animalAtivo]||{};contadoresAnimal[animalAtivo][c.nome]=(contadoresAnimal[animalAtivo][c.nome]||0)+1;}
+      if (btn){btn.classList.remove("flash");btn.classList.remove("clicado");void btn.offsetWidth;btn.classList.add("flash");btn.classList.add("clicado");setTimeout(()=>btn.classList.remove("clicado"),1500);atualizarBadge(btn,c.nome);}
       if (navigator.vibrate) navigator.vibrate(40);
       toast(c.nome+" · 🏷️"+animalAtivo+" → "+alvos.map(a=>"🏷️"+a).join(", "));
     });
@@ -1513,7 +1519,7 @@ async function registrar(c, btn) {
         timestamp:ini.getTime(),tipo:"duracao",audio:null,projeto_id:projetoAtivo.id});
       contadoresGeral[c.nome]=(contadoresGeral[c.nome]||0)+1;
       if (ativo.animal){contadoresAnimal[ativo.animal]=contadoresAnimal[ativo.animal]||{};contadoresAnimal[ativo.animal][c.nome]=(contadoresAnimal[ativo.animal][c.nome]||0)+1;}
-      if (btn){btn.classList.remove("rodando");btn.classList.remove("flash");void btn.offsetWidth;btn.classList.add("flash");atualizarBadge(btn,c.nome);}
+      if (btn){btn.classList.remove("rodando");btn.classList.remove("flash");btn.classList.remove("clicado");void btn.offsetWidth;btn.classList.add("flash");btn.classList.add("clicado");setTimeout(()=>btn.classList.remove("clicado"),1500);atualizarBadge(btn,c.nome);}
       if (navigator.vibrate) navigator.vibrate([40,60,40]);
       toast("⏹️ "+c.nome+" — "+fmtDur(durSeg));
       renderAnimaisBar(); garantirTick(); atualizarEstadoTimers();
@@ -1527,7 +1533,7 @@ async function registrar(c, btn) {
     hora_fim:"",iso_fim:"",duracao_seg:"",timestamp:d.getTime(),tipo:"botao",audio:null,projeto_id:projetoAtivo.id});
   contadoresGeral[c.nome]=(contadoresGeral[c.nome]||0)+1;
   if (animalAtivo){contadoresAnimal[animalAtivo]=contadoresAnimal[animalAtivo]||{};contadoresAnimal[animalAtivo][c.nome]=(contadoresAnimal[animalAtivo][c.nome]||0)+1;}
-  if (btn){btn.classList.remove("flash");void btn.offsetWidth;btn.classList.add("flash");atualizarBadge(btn,c.nome);}
+  if (btn){btn.classList.remove("flash");btn.classList.remove("clicado");void btn.offsetWidth;btn.classList.add("flash");btn.classList.add("clicado");setTimeout(()=>btn.classList.remove("clicado"),1500);atualizarBadge(btn,c.nome);}
   if (navigator.vibrate) navigator.vibrate(40);
   toast(c.nome+(animalAtivo?" · 🏷️"+animalAtivo:"")+" — "+horaHMS(d));
 }
@@ -1536,8 +1542,8 @@ async function registrar(c, btn) {
 let mediaRec=null, chunks=[], gravando=false;
 const btnRec = document.getElementById("btnRec");
 function sincMicNav() {
-  const nav=document.getElementById("btnMicNav");
-  if(nav) nav.textContent = gravando ? "⏹️" : "🎙️";
+  const lbl=document.querySelector("#btnMicNav .mic-lbl");
+  if(lbl) lbl.textContent = gravando ? "STOP" : "REC";
 }
 btnRec.onclick = async () => {
   if (!gravando) {
@@ -1779,10 +1785,18 @@ function exportarCompsCSV() {
 async function recarregarContadores() {
   const regs=await todosRegistros();
   contadoresGeral={}; contadoresAnimal={};
+  const vistosGeral=new Set();
+  const vistosAnimal={};
   regs.forEach(r=>{
     if(r.tipo!=="botao"&&r.tipo!=="duracao")return;
+    const a=r.animal||"";
+    if(r.animal_alvo&&r.tipo==="botao"){
+      const key=r.timestamp+"_"+a+"_"+r.comportamento;
+      if(vistosGeral.has(key))return;
+      vistosGeral.add(key);
+    }
     contadoresGeral[r.comportamento]=(contadoresGeral[r.comportamento]||0)+1;
-    const a=r.animal||""; contadoresAnimal[a]=contadoresAnimal[a]||{};
+    contadoresAnimal[a]=contadoresAnimal[a]||{};
     contadoresAnimal[a][r.comportamento]=(contadoresAnimal[a][r.comportamento]||0)+1;
   });
   renderGrade();
