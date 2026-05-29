@@ -194,16 +194,8 @@ main{flex:1;padding:0;overflow-y:auto;-webkit-overflow-scrolling:touch;}
   box-shadow:0 1px 3px rgba(0,0,0,.25);}
 .cont-animal.zero .num{background:rgba(0,0,0,.12);color:rgba(255,255,255,.55);}
 
-/* Contador total — rodapé do botão */
-.cont-total{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.22);
-  color:#fff;font-size:var(--fs-xs);font-weight:var(--fw-black);letter-spacing:.4px;
-  padding:var(--sp-1) 0;text-align:center;text-transform:uppercase;}
-.cont-total b{font-size:var(--fs-sm);}
-.btn-comp.tipo-dur .cont-total.dur{background:rgba(42,111,143,.7);}
-.btn-comp.tipo-dur .crono{font-variant-numeric:tabular-nums;}
 .btn-comp.rodando{outline:3px dashed rgba(255,220,0,1);outline-offset:-3px;
   animation:pulseDur 1.4s infinite;}
-.btn-comp.rodando .cont-total.dur{background:rgba(179,64,42,.8);}
 @keyframes pulseDur{0%,100%{box-shadow:var(--shadow-md)}
   50%{box-shadow:0 0 0 5px rgba(255,255,255,.2),var(--shadow-md)}}
 
@@ -1347,14 +1339,10 @@ function renderGrade() {
           const flagSoc  = c.social?'<span class="flag-soc">👥</span>':"";
           flags = `<span class="btn-flags"><span class="flag-tipo">${flagTipo}</span>${flagSoc}</span>`;
         }
-        const rodape = c.tipo==="dur"
-          ? `<span class="cont-total dur"><span class="crono">iniciar</span></span>`
-          : `<span class="cont-total">total: <b>${nT}</b></span>`;
         btn.innerHTML = `
           ${flags}
           <span class="cont-animal ${nA?"":"zero"}"><span class="num">${nA}</span></span>
-          <span class="nome">${c.nome}</span>
-          ${rodape}`;
+          <span class="nome">${c.nome}</span>`;
         if (derivados.length) {
           btn.onclick = () => mostrarModalDerivados(c, derivados, btn);
         } else {
