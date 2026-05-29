@@ -899,50 +899,54 @@ const DEFAULT_GRUPOS = [
 ];
 const DEFAULT_COMPS_RAW = [
   // Ingestivo / alimentar
-  {nome:"Ingestão de água",                tipo:"dur",  social:false, grupo_nome:"Ingestivo / alimentar",          mestre_nome:null},
-  {nome:"Ramoneio",                         tipo:"dur",  social:false, grupo_nome:"Ingestivo / alimentar",          mestre_nome:null},
+  {nome:"Ingestão de água",        tipo:"dur",  social:false, grupo_nome:"Ingestivo / alimentar",          mestre_nome:null},
+  {nome:"Ramoneio",                tipo:"dur",  social:false, grupo_nome:"Ingestivo / alimentar",          mestre_nome:null},
   // Locomotor / postural
-  {nome:"Empinar",                          tipo:"inst", social:false, grupo_nome:"Locomotor / postural",           mestre_nome:null},
-  {nome:"Fuga",                             tipo:"dur",  social:false, grupo_nome:"Locomotor / postural",           mestre_nome:null},
-  {nome:"Dormir",                           tipo:"dur",  social:false, grupo_nome:"Locomotor / postural",           mestre_nome:null},
+  {nome:"Empinar",                 tipo:"inst", social:false, grupo_nome:"Locomotor / postural",           mestre_nome:null},
+  {nome:"Fuga",                    tipo:"dur",  social:false, grupo_nome:"Locomotor / postural",           mestre_nome:null},
+  {nome:"Dormir",                  tipo:"dur",  social:false, grupo_nome:"Locomotor / postural",           mestre_nome:null},
   // Social afiliativo
-  {nome:"Autocatação mútua / Allogrooming", tipo:"dur",  social:true,  grupo_nome:"Social afiliativo",              mestre_nome:null},
-  {nome:"Contato",                          tipo:"dur",  social:true,  grupo_nome:"Social afiliativo",              mestre_nome:null},
-  {nome:"Brincadeira",                      tipo:"dur",  social:true,  grupo_nome:"Social afiliativo",              mestre_nome:null},
+  {nome:"Allogrooming",            tipo:"dur",  social:true,  grupo_nome:"Social afiliativo",              mestre_nome:null},
+  {nome:"Contato",                 tipo:"dur",  social:true,  grupo_nome:"Social afiliativo",              mestre_nome:null},
+  {nome:"Brincadeira",             tipo:"dur",  social:true,  grupo_nome:"Social afiliativo",              mestre_nome:null},
   // Social agonístico / agressivo
-  {nome:"Deslocar outro animal",            tipo:"inst", social:true,  grupo_nome:"Social agonístico / agressivo",  mestre_nome:null},
-  {nome:"Ameaça",                           tipo:"inst", social:true,  grupo_nome:"Social agonístico / agressivo",  mestre_nome:null},
-  {nome:"Perseguir",                        tipo:"dur",  social:true,  grupo_nome:"Social agonístico / agressivo",  mestre_nome:null},
-  {nome:"Snapping",                         tipo:"inst", social:true,  grupo_nome:"Social agonístico / agressivo",  mestre_nome:null},
+  {nome:"Deslocar outro animal",   tipo:"inst", social:true,  grupo_nome:"Social agonístico / agressivo",  mestre_nome:null},
+  {nome:"Ameaça",                  tipo:"inst", social:true,  grupo_nome:"Social agonístico / agressivo",  mestre_nome:null},
+  {nome:"Perseguir",               tipo:"dur",  social:true,  grupo_nome:"Social agonístico / agressivo",  mestre_nome:null},
+  {nome:"Snapping",                tipo:"inst", social:true,  grupo_nome:"Social agonístico / agressivo",  mestre_nome:null},
   // Manutenção corporal / conforto
-  {nome:"Coçar em objeto",                  tipo:"dur",  social:false, grupo_nome:"Manutenção corporal / conforto", mestre_nome:null},
-  {nome:"Espojar",                          tipo:"dur",  social:false, grupo_nome:"Manutenção corporal / conforto", mestre_nome:null},
-  {nome:"Bocejar",                          tipo:"inst", social:false, grupo_nome:"Manutenção corporal / conforto", mestre_nome:null},
-  {nome:"Autocatação / Grooming",           tipo:"dur",  social:false, grupo_nome:"Manutenção corporal / conforto", mestre_nome:null},
+  {nome:"Coçar em objeto",         tipo:"dur",  social:false, grupo_nome:"Manutenção corporal / conforto", mestre_nome:null},
+  {nome:"Espojar",                 tipo:"dur",  social:false, grupo_nome:"Manutenção corporal / conforto", mestre_nome:null},
+  {nome:"Bocejar",                 tipo:"inst", social:false, grupo_nome:"Manutenção corporal / conforto", mestre_nome:null},
+  {nome:"Grooming",                tipo:"dur",  social:false, grupo_nome:"Manutenção corporal / conforto", mestre_nome:null},
   // Eliminativo
-  {nome:"Micção",                           tipo:"inst", social:false, grupo_nome:"Eliminativo",                    mestre_nome:null},
-  {nome:"Defecação",                        tipo:"inst", social:false, grupo_nome:"Eliminativo",                    mestre_nome:null},
+  {nome:"Micção",                  tipo:"inst", social:false, grupo_nome:"Eliminativo",                    mestre_nome:null},
+  {nome:"Defecação",               tipo:"inst", social:false, grupo_nome:"Eliminativo",                    mestre_nome:null},
   // Comunicação / vocalização
-  {nome:"Relincho",                         tipo:"inst", social:false, grupo_nome:"Comunicação / vocalização",      mestre_nome:null},
-  {nome:"Guincho",                          tipo:"inst", social:false, grupo_nome:"Comunicação / vocalização",      mestre_nome:null},
-  {nome:"Resfôlego",                        tipo:"inst", social:false, grupo_nome:"Comunicação / vocalização",      mestre_nome:null},
+  {nome:"Relincho",                tipo:"inst", social:false, grupo_nome:"Comunicação / vocalização",      mestre_nome:null},
+  {nome:"Guincho",                 tipo:"inst", social:false, grupo_nome:"Comunicação / vocalização",      mestre_nome:null},
+  {nome:"Resfôlego",               tipo:"inst", social:false, grupo_nome:"Comunicação / vocalização",      mestre_nome:null},
   // Anormal / estereotipado
-  {nome:"Mastigação não nutritiva",         tipo:"dur",  social:false, grupo_nome:"Anormal / estereotipado",        mestre_nome:null},
+  {nome:"Mastigação não nutritiva",tipo:"dur",  social:false, grupo_nome:"Anormal / estereotipado",        mestre_nome:null},
+  // Derivados — Ingestivo / alimentar > Ramoneio
+  {nome:"Arbusto",                 tipo:"dur",  social:false, grupo_nome:"Ingestivo / alimentar",          mestre_nome:"Ramoneio"},
+  {nome:"Árvore",                  tipo:"dur",  social:false, grupo_nome:"Ingestivo / alimentar",          mestre_nome:"Ramoneio"},
+  {nome:"Raiz",                    tipo:"dur",  social:false, grupo_nome:"Ingestivo / alimentar",          mestre_nome:"Ramoneio"},
   // Derivados — Social agonístico / agressivo > Ameaça
-  {nome:"Coicear",                          tipo:"inst", social:true,  grupo_nome:"Social agonístico / agressivo",  mestre_nome:"Ameaça"},
-  {nome:"Morder",                           tipo:"inst", social:true,  grupo_nome:"Social agonístico / agressivo",  mestre_nome:"Ameaça"},
+  {nome:"Coicear",                 tipo:"inst", social:true,  grupo_nome:"Social agonístico / agressivo",  mestre_nome:"Ameaça"},
+  {nome:"Morder",                  tipo:"inst", social:true,  grupo_nome:"Social agonístico / agressivo",  mestre_nome:"Ameaça"},
   // Derivados — Social afiliativo > Contato
-  {nome:"Cabeça-corpo",                     tipo:"inst", social:true,  grupo_nome:"Social afiliativo",              mestre_nome:"Contato"},
-  {nome:"Nariz-corpo",                      tipo:"inst", social:true,  grupo_nome:"Social afiliativo",              mestre_nome:"Contato"},
-  {nome:"Nariz-nariz",                      tipo:"inst", social:true,  grupo_nome:"Social afiliativo",              mestre_nome:"Contato"},
+  {nome:"Cabeça-corpo",            tipo:"inst", social:true,  grupo_nome:"Social afiliativo",              mestre_nome:"Contato"},
+  {nome:"Nariz-corpo",             tipo:"inst", social:true,  grupo_nome:"Social afiliativo",              mestre_nome:"Contato"},
+  {nome:"Nariz-nariz",             tipo:"inst", social:true,  grupo_nome:"Social afiliativo",              mestre_nome:"Contato"},
   // Derivados — Social afiliativo > Brincadeira
-  {nome:"Locomotora",                       tipo:"inst", social:true,  grupo_nome:"Social afiliativo",              mestre_nome:"Brincadeira"},
-  {nome:"Luta",                             tipo:"inst", social:true,  grupo_nome:"Social afiliativo",              mestre_nome:"Brincadeira"},
-  {nome:"Objeto",                           tipo:"inst", social:true,  grupo_nome:"Social afiliativo",              mestre_nome:"Brincadeira"},
+  {nome:"Locomotora",              tipo:"inst", social:true,  grupo_nome:"Social afiliativo",              mestre_nome:"Brincadeira"},
+  {nome:"Luta",                    tipo:"inst", social:true,  grupo_nome:"Social afiliativo",              mestre_nome:"Brincadeira"},
+  {nome:"Objeto",                  tipo:"inst", social:true,  grupo_nome:"Social afiliativo",              mestre_nome:"Brincadeira"},
   // Derivados — Comunicação / vocalização > Relincho
-  {nome:"Normal",                           tipo:"inst", social:false, grupo_nome:"Comunicação / vocalização",      mestre_nome:"Relincho"},
-  {nome:"Suave",                            tipo:"inst", social:false, grupo_nome:"Comunicação / vocalização",      mestre_nome:"Relincho"},
-  {nome:"Longo",                            tipo:"inst", social:false, grupo_nome:"Comunicação / vocalização",      mestre_nome:"Relincho"},
+  {nome:"Normal",                  tipo:"inst", social:false, grupo_nome:"Comunicação / vocalização",      mestre_nome:"Relincho"},
+  {nome:"Suave",                   tipo:"inst", social:false, grupo_nome:"Comunicação / vocalização",      mestre_nome:"Relincho"},
+  {nome:"Longo",                   tipo:"inst", social:false, grupo_nome:"Comunicação / vocalização",      mestre_nome:"Relincho"},
 ];
 
 /* ─── STATE ────────────────────────────────────────────────── */
