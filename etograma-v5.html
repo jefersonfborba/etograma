@@ -540,6 +540,9 @@ table.tab .cel-t{color:var(--bg-duration);font-size:var(--fs-2xs);font-weight:va
 
 /* MODAL NOVO PROJETO */
 #modal-novo-proj .modal-box{padding:var(--sp-6);}
+.modal-box-sm{max-width:380px;width:100%;margin:0 auto;}
+.modal-erro{display:block;min-height:1.1em;color:var(--bg-danger);font-size:var(--fs-xs);
+  font-weight:var(--fw-bold);margin:4px 0 10px;}
 .modal-input{width:100%;border:1.5px solid var(--border-default);border-radius:var(--r-sm);
   padding:var(--sp-3) var(--sp-4);font-size:var(--fs-sm);font-weight:var(--fw-semibold);
   color:var(--text-primary);font-family:var(--font-primary);box-sizing:border-box;
@@ -885,10 +888,11 @@ table.tab .cel-t{color:var(--bg-duration);font-size:var(--fs-2xs);font-weight:va
 
 <!-- MODAL adicionar animal -->
 <div id="modal-animal-add" class="modal-overlay" hidden>
-  <div class="modal-box">
+  <div class="modal-box modal-box-sm">
     <p>Novo animal</p>
     <label class="modal-label">Identificação</label>
     <input id="animal-add-inp" class="modal-input" type="text" maxlength="20" placeholder="Ex: Preto, 341, Touro A…">
+    <span id="animal-add-erro" class="modal-erro"></span>
     <div class="modal-btns">
       <button class="btn-cancel" id="animal-add-cancel">Cancelar</button>
       <button class="btn-ok" id="animal-add-ok" style="background:var(--bg-primary)">Confirmar</button>
@@ -898,10 +902,11 @@ table.tab .cel-t{color:var(--bg-duration);font-size:var(--fs-2xs);font-weight:va
 
 <!-- MODAL editar animal -->
 <div id="modal-animal-edit" class="modal-overlay" hidden>
-  <div class="modal-box">
+  <div class="modal-box modal-box-sm">
     <p>Editar animal</p>
     <label class="modal-label">Identificação</label>
     <input id="animal-edit-inp" class="modal-input" type="text" maxlength="20">
+    <span id="animal-edit-erro" class="modal-erro"></span>
     <div class="modal-btns" style="flex-direction:column;gap:var(--sp-2)">
       <button class="btn-ok" id="animal-edit-salvar" style="background:var(--bg-primary)">Salvar</button>
       <button class="btn-ok" id="animal-edit-excluir" style="background:var(--bg-danger)">🗑️ Excluir animal</button>
@@ -1939,18 +1944,25 @@ document.getElementById("btnAddAnimal").onclick=()=>abrirModalAddAnimal();
 
 /* ─── MODAL ADICIONAR ANIMAL ─────────────────────────────── */
 function abrirModalAddAnimal(){
-  document.getElementById("animal-add-inp").value="";
+  const inp=document.getElementById("animal-add-inp");
+  inp.value="";
+  document.getElementById("animal-add-erro").textContent="";
   document.getElementById("modal-animal-add").hidden=false;
-  setTimeout(()=>document.getElementById("animal-add-inp").focus(),80);
+  setTimeout(()=>{inp.focus();inp.select();},80);
 }
 document.getElementById("animal-add-cancel").onclick=()=>{
   document.getElementById("modal-animal-add").hidden=true;
 };
 document.getElementById("animal-add-ok").onclick=()=>{
   const inp=document.getElementById("animal-add-inp");
+  const erro=document.getElementById("animal-add-erro");
   const nome=inp.value.trim();
-  if(!nome){inp.focus();return;}
-  if(animais.some(a=>a.nome===nome)){toast("⚠️ Identificação já cadastrada");inp.focus();return;}
+  if(!nome){erro.textContent="";inp.focus();return;}
+  if(animais.some(a=>a.nome===nome)){
+    erro.textContent="Identificação '"+nome+"' já está em uso.";
+    inp.focus();inp.select();return;
+  }
+  erro.textContent="";
   document.getElementById("modal-animal-add").hidden=true;
   animais.push({id:genId(),nome}); persistirAnimais(); renderAnimaisCfg();
 };
@@ -1963,19 +1975,25 @@ let _animalEditId=null;
 function abrirModalEditarAnimal(id){
   const a=animais.find(x=>x.id===id); if(!a)return;
   _animalEditId=id;
-  document.getElementById("animal-edit-inp").value=a.nome;
+  const inpE=document.getElementById("animal-edit-inp");
+  inpE.value=a.nome;
+  document.getElementById("animal-edit-erro").textContent="";
   document.getElementById("modal-animal-edit").hidden=false;
-  setTimeout(()=>document.getElementById("animal-edit-inp").focus(),80);
+  setTimeout(()=>{inpE.focus();inpE.select();},80);
 }
 document.getElementById("animal-edit-cancel").onclick=()=>{
   document.getElementById("modal-animal-edit").hidden=true;
 };
 document.getElementById("animal-edit-salvar").onclick=()=>{
   const inp=document.getElementById("animal-edit-inp");
+  const erro=document.getElementById("animal-edit-erro");
   const nome=inp.value.trim();
   const idx=animais.findIndex(x=>x.id===_animalEditId);
-  if(!nome){inp.focus();return;}
-  if(animais.some((x,j)=>j!==idx&&x.nome===nome)){toast("⚠️ Identificação já cadastrada");inp.focus();return;}
+  if(!nome){erro.textContent="";inp.focus();return;}
+  if(animais.some((x,j)=>j!==idx&&x.nome===nome)){
+    erro.textContent="Identificação '"+nome+"' já está em uso.";
+    inp.focus();inp.select();return;
+  }
   animais[idx].nome=nome;
   document.getElementById("modal-animal-edit").hidden=true;
   persistirAnimais(); renderAnimaisCfg();
