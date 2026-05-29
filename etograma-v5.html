@@ -672,6 +672,8 @@ table.tab .cel-t{color:var(--bg-duration);font-size:var(--fs-2xs);font-weight:va
       <div class="sec-spacer"></div>
       <div class="sec-actions">
         <button class="sec-btn add" id="btnAddGrupo" title="Adicionar grupo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+        <button class="sec-btn imp" id="btnImpGrupos" title="Importar"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></button>
+        <button class="sec-btn exp" id="btnExpGrupos" title="Exportar"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
       </div>
     </div>
     <div class="sec-body">
@@ -699,6 +701,7 @@ table.tab .cel-t{color:var(--bg-duration);font-size:var(--fs-2xs);font-weight:va
     </div>
   </div>
   <input type="file" id="fileComps" accept=".csv,.json,text/csv,application/json" hidden>
+  <input type="file" id="fileGrupos" accept=".csv,.json,text/csv,application/json" hidden>
 
 </section>
 </main>
@@ -1962,6 +1965,79 @@ function ativarDragGrupos(cont) {
   });
 }
 document.getElementById("btnAddGrupo").onclick=()=>abrirSheetGrupo(null);
+
+function exportarGruposJSON() {
+  const obj={versao:1,exportado_em:dataBR(agora()),
+    grupos:[...grupos].sort((a,b)=>a.nivel-b.nivel).map(g=>({nome:g.nome,descricao:g.descricao||"",nivel:g.nivel,cor:g.cor}))};
+  baixar(new Blob([JSON.stringify(obj,null,2)],{type:"application/json"}),"grupos_"+nomeArquivo()+".json");
+  toast("✅ JSON de grupos exportado");
+}
+function exportarGruposCSV() {
+  const sep=";", cab=["nome","nivel","cor"];
+  let csv=cab.join(sep)+"\n";
+  [...grupos].sort((a,b)=>a.nivel-b.nivel).forEach(g=>{
+    csv+=[g.nome,g.nivel,g.cor].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(sep)+"\n";
+  });
+  baixar(new Blob(["﻿"+csv],{type:"text/csv;charset=utf-8;"}),"grupos_"+nomeArquivo()+".csv");
+  toast("✅ CSV de grupos exportado");
+}
+function importarGruposDeJSON(obj) {
+  return (obj.grupos||[]).map(g=>({nome:g.nome,descricao:g.descricao||"",nivel:Number(g.nivel)||1,cor:g.cor||"#2d7a3a"}));
+}
+function importarGruposDeCSV(txt) {
+  const linhas=txt.trim().split(/\r?\n/);
+  return linhas.reduce((acc,l,i)=>{
+    if(i===0&&/nome|nivel/i.test(l))return acc;
+    const cols=l.split(";").map(c=>c.trim().replace(/^["']|["']$/g,""));
+    if(!cols[0])return acc;
+    acc.push({nome:cols[0],descricao:"",nivel:parseInt(cols[1])||acc.length+1,cor:cols[2]||"#2d7a3a"});
+    return acc;
+  },[]);
+}
+async function aplicarImportGrupos(parsed, mesclar=false) {
+  if(!mesclar){
+    for(const g of grupos)await storeDel("grupos",g.id);
+    for(const c of comportamentos)await storeDel("comportamentos",c.id);
+    grupos=[];comportamentos=[];
+  }
+  for(const g of parsed){
+    if(mesclar&&grupos.find(x=>x.nome===g.nome))continue;
+    await storePut("grupos",{nome:g.nome,descricao:g.descricao||"",nivel:g.nivel,cor:g.cor});
+  }
+  grupos=await storeGetAll("grupos");
+  comportamentos=await storeGetAll("comportamentos");
+  renderGruposCfg();renderCompsCfg();renderGrade();atualizarBadgesCfg();
+}
+document.getElementById("fileGrupos").onchange=function(){
+  const f=this.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=async e=>{
+    this.value="";
+    const txt=e.target.result;
+    let parsed;
+    if(f.name.endsWith(".json")||txt.trim().startsWith("{")){
+      try{parsed=importarGruposDeJSON(JSON.parse(txt));}
+      catch{toast("⚠️ JSON inválido");return;}
+    }else{
+      parsed=importarGruposDeCSV(txt);
+    }
+    if(!parsed||!parsed.length){toast("⚠️ Nenhum grupo encontrado");return;}
+    abrirModalImport(
+      `${parsed.length} grupo(s) encontrado(s).\n\nSubstituir apaga todos os grupos e comportamentos atuais.`,
+      async()=>{await aplicarImportGrupos(parsed);toast("✅ Grupos importados (substituídos)");},
+      async()=>{await aplicarImportGrupos(parsed,true);toast("✅ Grupos mesclados");}
+    );
+  };
+  r.readAsText(f,"utf-8");
+};
+document.getElementById("btnImpGrupos").onclick=()=>document.getElementById("fileGrupos").click();
+document.getElementById("btnExpGrupos").onclick=()=>{
+  confirmar("Exportar grupos como:",
+    ()=>exportarGruposJSON(),()=>exportarGruposCSV()
+  );
+  document.getElementById("modal-ok").textContent="JSON";
+  document.getElementById("modal-cancel").textContent="CSV";
+};
 
 /* ─── CADASTRO — COMPORTAMENTOS ──────────────────────────────── */
 function renderCompsCfg() {
