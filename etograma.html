@@ -1469,9 +1469,9 @@ function garantirTick() {
 }
 
 /* ─── MODAL DE DERIVADOS ────────────────────────────────────── */
-document.getElementById("modal-der-cancel").onclick = () => {
-  document.getElementById("modal-derivados").hidden = true;
-};
+const _fecharDer = () => { document.getElementById("modal-derivados").hidden = true; };
+document.getElementById("modal-der-cancel").onclick = _fecharDer;
+document.getElementById("modal-derivados").addEventListener("click", e => { if (e.target === document.getElementById("modal-derivados")) _fecharDer(); });
 function mostrarModalDerivados(mestre, derivados, btnMestre) {
   document.getElementById("modal-der-titulo").textContent = mestre.nome+" — qual especificamente?";
   const chips = document.getElementById("modal-der-chips");
