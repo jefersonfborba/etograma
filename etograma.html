@@ -65,6 +65,10 @@ header h1{font-size:1.7rem;margin:0;font-weight:var(--fw-black);letter-spacing:.
   color:var(--text-header-sub);margin-top:2px;white-space:nowrap;
   overflow:hidden;text-overflow:ellipsis;display:none;}
 .projeto-badge.vis{display:block;}
+.projeto-badge.timer-global{color:var(--text-inverse);}
+.projeto-badge.timer-global::before{content:"";display:inline-block;width:8px;height:8px;
+  border-radius:50%;background:#ff5c5c;margin-right:6px;vertical-align:middle;
+  animation:pulse-dot 1.2s infinite;}
 
 /* BARRA DE ANIMAIS */
 .animais-bar{display:flex;gap:var(--sp-2);overflow-x:auto;padding:var(--sp-2) 0 var(--sp-1);
@@ -239,8 +243,8 @@ body.em-registrar .btn-mic-nav{display:flex;}
 body.gravando-audio .btn-mic-nav{background:var(--bg-record);animation:pulse 1s infinite;}
 
 /* Borda tracejada amarela: feedback de "clicado" */
-.btn-comp.clicado{outline:3px dashed rgba(255,220,0,1);outline-offset:-3px;}
-.alvo-chip.clicado{outline:3px dashed rgba(255,220,0,1);outline-offset:-2px;}
+.btn-comp.clicado{box-shadow:inset 0 0 0 3px rgba(0,0,0,.35),var(--shadow-md);}
+.alvo-chip.clicado{box-shadow:inset 0 0 0 3px rgba(0,0,0,.35);}
 
 /* Botão mestre com derivado ativo */
 .btn-comp.rodando-der{outline:3px dashed rgba(255,220,0,1);outline-offset:-3px;
@@ -1461,6 +1465,7 @@ function garantirTick() {
   const algum = Object.keys(timersAtivos).length>0;
   if (algum && !tickTimer) tickTimer = setInterval(atualizarEstadoTimers,1000);
   if (!algum && tickTimer) { clearInterval(tickTimer); tickTimer=null; }
+  document.getElementById("projetoNome")?.classList.toggle("timer-global", algum);
 }
 
 /* ─── MODAL DE DERIVADOS ────────────────────────────────────── */
