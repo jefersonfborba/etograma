@@ -194,9 +194,9 @@ main{flex:1;padding:0;overflow-y:auto;-webkit-overflow-scrolling:touch;}
   box-shadow:0 1px 3px rgba(0,0,0,.25);}
 .cont-animal.zero .num{background:rgba(0,0,0,.12);color:rgba(255,255,255,.55);}
 
-/* Cronômetro — centro-topo do botão, visível quando rodando ou rodando-der */
-.btn-comp .crono{position:absolute;top:7px;left:50%;transform:translateX(-50%);
-  font-size:var(--fs-2xs);font-weight:var(--fw-black);font-variant-numeric:tabular-nums;
+/* Cronômetro — borda inferior do botão, visível quando rodando ou rodando-der */
+.btn-comp .crono{position:absolute;bottom:7px;left:50%;transform:translateX(-50%);
+  font-size:var(--fs-xs);font-weight:var(--fw-black);font-variant-numeric:tabular-nums;
   background:rgba(0,0,0,.30);color:#fff;padding:2px 7px;border-radius:var(--r-pill);
   white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s;}
 .btn-comp.rodando .crono,.btn-comp.rodando-der .crono{opacity:1;}
@@ -1306,8 +1306,8 @@ function renderAnimaisBar() {
     b.className = "chip-animal"+(a.id===animalAtivo?" ativo":"")+(temTimer?" timer-ativo":"");
     b.innerHTML = '<span class="tag-ico">🏷️</span>'+a.nome+(temTimer?'<span class="chip-timer-dot"></span>':"");
     b.onclick = () => {
-      animalAtivo = a.id;
-      salvarConfig("animalAtivo_"+projetoAtivo.id, a.id);
+      animalAtivo = a.id === animalAtivo ? null : a.id;
+      salvarConfig("animalAtivo_"+projetoAtivo.id, animalAtivo);
       renderAnimaisBar(); atualizarAvisoEbotoes(); recarregarContadores();
     };
     bar.appendChild(b);
