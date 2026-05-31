@@ -1835,12 +1835,16 @@ function buildXlsx(sheets){const f=[];f.push({name:"[Content_Types].xml",data:_s
 async function exportarCSV() {
   const regs=(await todosRegistros()).sort((a,b)=>a.timestamp-b.timestamp);
   if(!regs.length){toast("Nada para exportar");return;}
-  const sep=";", cab=["Observador","Projeto","Animal","Animal_alvo","Comportamento","Data","Hora_inicio","Hora_fim","Duracao_seg","DataHora_ISO","Tipo","Tem_audio"];
+  const sep=";", cab=["Observador","Projeto","Animal","Animal_alvo","Comportamento_mestre","Comportamento_derivado","Data","Hora_inicio","Hora_fim","Duracao_seg","DataHora_ISO","Tipo","Tem_audio"];
   let csv=cab.join(sep)+"\n";
   regs.forEach(r=>{
     const nA=nomeAnimal(r.animal_id)||r.animal||"";
     const nAv=nomeAnimal(r.animal_alvo_id)||r.animal_alvo||"";
-    csv+=[r.observador||"",projetoAtivo?.nome||"",nA,nAv,r.comportamento,r.data,r.hora,r.hora_fim||"",r.duracao_seg||"",r.iso,r.tipo,r.tipo==="audio"?"sim":"nao"]
+    const compObj=comportamentos.find(x=>x.nome===r.comportamento);
+    const isDer=compObj&&compObj.mestre_id;
+    const cMestre=isDer?(comportamentos.find(x=>x.id===compObj.mestre_id)||{}).nome||r.comportamento:r.comportamento;
+    const cDer=isDer?r.comportamento:"";
+    csv+=[r.observador||"",projetoAtivo?.nome||"",nA,nAv,cMestre,cDer,r.data,r.hora,r.hora_fim||"",r.duracao_seg||"",r.iso,r.tipo,r.tipo==="audio"?"sim":"nao"]
       .map(c=>`"${String(c).replace(/"/g,'""')}"`).join(sep)+"\n";
   });
   baixar(new Blob(["﻿"+csv],{type:"text/csv;charset=utf-8;"}),"etograma_"+nomeArquivo()+".csv");
