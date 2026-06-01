@@ -298,7 +298,9 @@ body.gravando-audio .ham-rec-dot{display:block;}
   color:var(--text-primary);cursor:pointer;font-family:var(--font-primary);width:100%;}
 .ham-link:active{background:var(--bg-page);}
 .ham-sep{height:1px;background:var(--border-light);margin:var(--sp-2) var(--sp-3);}
-.ham-rec-wrap{padding:var(--sp-2) var(--sp-1);margin-top:auto;}
+.ham-rec-wrap{padding:var(--sp-2) var(--sp-1);}
+.ham-foot{padding:var(--sp-3) var(--sp-4);border-top:1px solid var(--border-light);
+  color:var(--c-brown-400);font-size:var(--fs-2xs);text-align:center;margin-top:auto;}
 
 /* REGISTROS */
 .reg{background:var(--bg-surface);border-radius:var(--r-lg);padding:11px var(--sp-4);
@@ -732,6 +734,7 @@ table.tab .cel-t{color:var(--bg-duration);font-size:var(--fs-2xs);font-weight:va
         </button>
       </div>
     </div>
+    <div class="ham-foot" id="hamVersion"></div>
   </div>
 </div>
 
@@ -921,6 +924,8 @@ table.tab .cel-t{color:var(--bg-duration);font-size:var(--fs-2xs);font-weight:va
 </div>
 
 <script>
+const APP_VERSION = '1.0.0';
+
 /* ============================================================
    ETOGRAMA DE CAMPO v5
    Novidades: usuário/projetos, grupos comportamentais,
@@ -2459,6 +2464,7 @@ const hamOverlay=document.getElementById("hamOverlay");
 function fecharHam(){if(hamOverlay)hamOverlay.classList.remove("open");}
 document.getElementById("hamBtn").onclick=()=>{
   document.getElementById("hamProjNome").textContent=projetoAtivo?projetoAtivo.nome:"";
+  document.getElementById("hamVersion").textContent=`v${APP_VERSION}`;
   hamOverlay.classList.add("open");
 };
 document.getElementById("hamClose").onclick=fecharHam;
