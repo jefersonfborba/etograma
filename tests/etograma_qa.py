@@ -25,7 +25,7 @@ URL = "https://jefersonfborba.github.io/etograma/etograma.html"
 
 DURATION_SIMULTANEOUS_WAIT_S = 10   # segundos para fase de duração simultânea
 DURATION_INDIVIDUAL_WAIT_S   = 7    # segundos para timers individuais com modal
-CLICK_DELAY_MS               = 250  # pausa entre cliques
+CLICK_DELAY_MS               = 600  # pausa entre cliques
 
 
 # ─── Seletores ────────────────────────────────────────────────────────────────
@@ -305,8 +305,8 @@ async def handle_download(download: Download) -> None:
 
 async def main():
     async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=False, slow_mo=50)
-        context = await browser.new_context(accept_downloads=True)
+        browser = await p.chromium.launch(headless=False, slow_mo=300, args=["--start-maximized"])
+        context = await browser.new_context(accept_downloads=True, no_viewport=True)
         page = await context.new_page()
 
         # Intercepta downloads e salva em pasta conhecida
