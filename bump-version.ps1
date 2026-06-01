@@ -41,12 +41,18 @@ if ($DryRun) {
     exit 0
 }
 
-# Atualiza o arquivo
+# Atualiza etograma.html
 $updated = $content -replace "const APP_VERSION = '$current'", "const APP_VERSION = '$next'"
 Set-Content $file $updated -NoNewline
 
+# Atualiza cache name no sw.js
+$swFile = Join-Path $PSScriptRoot "sw.js"
+$swContent = Get-Content $swFile -Raw
+$swUpdated = $swContent -replace "const CACHE = 'etograma-v$current'", "const CACHE = 'etograma-v$next'"
+Set-Content $swFile $swUpdated -NoNewline
+
 # Commit + tag
-git add etograma.html
+git add etograma.html sw.js
 git commit -m "chore: bump version to $next"
 git tag "v$next"
 
