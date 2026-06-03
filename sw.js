@@ -1,6 +1,8 @@
-const CACHE = 'etograma-v1.0.0';
+const CACHE = 'etograma-v1.0.1';
+const SHELL = './etograma.html';
 const ASSETS = [
   './',
+  './index.html',
   './etograma.html',
   './etograma-v2.html',
   './etograma-v3.html',
@@ -25,6 +27,13 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
+  // Navegações (abrir pelo ícone, F5, links) sempre servem o shell cacheado
+  if (e.request.mode === 'navigate') {
+    e.respondWith(
+      caches.match(SHELL).then(cached => cached || fetch(e.request))
+    );
+    return;
+  }
   e.respondWith(
     caches.match(e.request).then(cached => cached || fetch(e.request))
   );
