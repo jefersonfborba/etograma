@@ -1,4 +1,4 @@
-const CACHE = 'etograma-v1.0.2';
+const CACHE = 'etograma-v1.0.3';
 const SHELL = './etograma.html';
 const ASSETS = [
   './',
