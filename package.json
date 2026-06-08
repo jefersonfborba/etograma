@@ -1,0 +1,29 @@
+{
+  "name": "etograma",
+  "version": "1.0.0",
+  "description": "Etograma de Campo — Bovinos: registro de comportamento etológico",
+  "scripts": {
+    "sync": "cap sync",
+    "open:android": "cap open android"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jefersonfborba/etograma.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/jefersonfborba/etograma/issues"
+  },
+  "homepage": "https://github.com/jefersonfborba/etograma#readme",
+  "dependencies": {
+    "@capacitor/android": "^8.4.0",
+    "@capacitor/cli": "^8.4.0",
+    "@capacitor/core": "^8.4.0"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.3"
+  }
+}

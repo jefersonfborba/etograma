@@ -13,8 +13,9 @@
 .claude/
 squads/
 agents/
-docs/
 node_modules/
+
+# docs/ é rastreado — contém stories, PRD e arquitetura do projeto
 
 # Build & Logs
 dist/
@@ -32,6 +33,15 @@ Thumbs.db
 AGENTS.md
 .env.example
 core-config.yaml
-package.json
-package-lock.json
 *.cmd
+
+# Node.js — rastreados (necessários para Capacitor)
+!package.json
+!package-lock.json
+
+# Android — build artifacts (pasta android/ é rastreada)
+android/app/build/
+android/build/
+android/.gradle/
+android/app/.cxx/
+android/local.properties
