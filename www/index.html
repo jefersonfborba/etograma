@@ -1112,9 +1112,26 @@ function fmtDataHora(iso) {
   const d = new Date(iso);
   return dataBR(d) + " " + pad(d.getHours()) + ":" + pad(d.getMinutes());
 }
-function baixar(blob, nome) {
-  const url=URL.createObjectURL(blob), a=document.createElement("a");
-  a.href=url; a.download=nome; document.body.appendChild(a); a.click();
+function isNativeApp(){return!!(window.Capacitor&&window.Capacitor.isNativePlatform());}
+async function exportNativoCapacitor(blob,nome){
+  const FS=window.Capacitor.registerPlugin('Filesystem');
+  const SH=window.Capacitor.registerPlugin('Share');
+  const isText=blob.type.startsWith('text/')||/^application\/json/.test(blob.type);
+  let opts;
+  if(isText){
+    opts={path:nome,data:await blob.text(),directory:'CACHE',encoding:'utf8'};
+  }else{
+    const ab=await blob.arrayBuffer(),bytes=new Uint8Array(ab),chunks=[];
+    for(let i=0;i<bytes.length;i+=8192)chunks.push(String.fromCharCode(...bytes.subarray(i,i+8192)));
+    opts={path:nome,data:btoa(chunks.join('')),directory:'CACHE'};
+  }
+  const r=await FS.writeFile(opts);
+  await SH.share({title:nome,url:r.uri}).catch(()=>{});
+}
+async function baixar(blob,nome){
+  if(isNativeApp()){await exportNativoCapacitor(blob,nome);return;}
+  const url=URL.createObjectURL(blob),a=document.createElement("a");
+  a.href=url;a.download=nome;document.body.appendChild(a);a.click();
   setTimeout(()=>{URL.revokeObjectURL(url);a.remove();},500);
 }
 function textoCor(hex) {
