@@ -1,0 +1,20 @@
+schema: 1
+story: '1.5'
+gate: CONCERNS
+status_reason: 'Todos os 10 ACs verificados e funcionando. Três pontos de manutenibilidade e confiabilidade identificados — nenhum bloqueador para uso em campo.'
+reviewer: Quinn
+updated: '2026-06-08T23:55:00Z'
+top_issues:
+  - id: MNT-001
+    severity: low
+    finding: 'exportarCSVParaNovaPasta não tem try/catch — se a escrita na nova pasta falhar, o handle é salvo e o toast "Projeto atualizado" é exibido sem indicação de erro'
+    suggested_action: 'Envolver o corpo de exportarCSVParaNovaPasta em try/catch; em caso de erro exibir toast de aviso antes de prosseguir com o salvamento do handle'
+  - id: REL-001
+    severity: low
+    finding: 'executarExclusaoProjeto não limpa backupDirHandle_{id} do IndexedDB após exclusão — config store acumula handles orphaned'
+    suggested_action: 'Adicionar await storeDel("config", "backupDirHandle_" + id) e await storeDel("config", "ultima_exportacao_ts_" + id) em executarExclusaoProjeto'
+  - id: REL-002
+    severity: low
+    finding: 'ativarBackupProjeto(id) chamado sem await em entrarProjeto — race condition teórica se o primeiro addRegistro ocorrer em < 200ms após abertura do projeto'
+    suggested_action: 'Baixo risco prático (usuário precisa navegar até Registrar e selecionar comportamento). Pode ser mitigado com await em versão futura se reportado em campo'
+waiver: { active: false }
