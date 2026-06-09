@@ -55,7 +55,8 @@ Empacotar o PWA Etograma em um app Android nativo instalável via APK (sideloadi
 | 1.2 | Adaptar exportação CSV para Android | Draft |
 | 1.3 | Configurar permissões e recursos nativos Android | Draft |
 | 1.4 | Build APK e validação em dispositivo real | InProgress |
-| 1.5 | Backup CSV automático integrado ao ciclo de vida do projeto | Draft |
+| 1.5 | Backup CSV automático integrado ao ciclo de vida do projeto | Done |
+| 1.6 | Backup CSV automático via Capacitor Filesystem (Android nativo) | Done |
 
 ---
 
