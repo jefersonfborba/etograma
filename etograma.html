@@ -642,6 +642,7 @@ table.tab .cel-t{color:var(--bg-duration);font-size:var(--fs-2xs);font-weight:va
     <button class="home-card" data-tab="resumo"><span class="home-ico">📊</span><span class="home-lbl">Resumo</span></button>
     <button class="home-card" data-tab="cfg"><span class="home-ico">⚙️</span><span class="home-lbl">Cadastros</span></button>
   </div>
+  <div id="backup-nativo-info" style="display:none;font-size:0.75rem;color:var(--text-muted,#888);text-align:center;padding:var(--sp-2,8px) 0 0">💾 Backup automático: Documents</div>
 </section>
 
 <!-- REGISTRAR -->
@@ -655,6 +656,7 @@ table.tab .cel-t{color:var(--bg-duration);font-size:var(--fs-2xs);font-weight:va
   <div class="acoes-export">
     <button id="expXlsx">📊 Excel</button>
     <button id="expCsv">⬇️ CSV</button>
+    <button id="btnShareCSV" style="display:none">📤 Compartilhar CSV</button>
     <button id="expAudios" class="alt">🎧 Áudios</button>
     <button id="limpar" class="perigo">🗑️ Limpar</button>
   </div>
@@ -976,7 +978,7 @@ table.tab .cel-t{color:var(--bg-duration);font-size:var(--fs-2xs);font-weight:va
 </div>
 
 <script>
-const APP_VERSION = '1.0.4';
+const APP_VERSION = '1.0.5';
 document.getElementById("idVersion").textContent = `v${APP_VERSION}`;
 
 /* ============================================================
@@ -1096,7 +1098,7 @@ function storeDel(store, id) {
 let backupDirHandle = null;
 let backupAtivo = false;
 
-function addRegistro(r)    { return new Promise((res,rej)=>{ const q=tx("registros","readwrite").add(r); q.onsuccess=()=>{ appendToBackupCSV(r).catch(()=>{}); res(q.result); }; q.onerror=rej; }); }
+function addRegistro(r)    { return new Promise((res,rej)=>{ const q=tx("registros","readwrite").add(r); q.onsuccess=()=>{ appendToBackupCSV(r).catch(()=>{}); appendToBackupCSVNativo(r).catch(()=>{}); res(q.result); }; q.onerror=rej; }); }
 function delRegistro(id)   { return storeDel("registros", id); }
 async function todosRegistros() {
   const all = await storeGetAll("registros");
@@ -1286,7 +1288,7 @@ document.getElementById("btnNovoProjeto").onclick = () => {
   document.getElementById("proj-desc-inp").value = "";
   const pastaRow = document.getElementById("novo-proj-pasta-row");
   const pastaBtn = document.getElementById("novo-proj-pasta-btn");
-  if (backupSuportado()) {
+  if (backupSuportado() && !backupCapacitorAtivo()) {
     pastaRow.classList.add("vis");
     pastaBtn.textContent = "📁 Selecionar pasta...";
     pastaBtn.classList.remove("selecionado");
@@ -1311,7 +1313,7 @@ document.getElementById("modal-proj-cancel").onclick = () => {
 document.getElementById("modal-proj-ok").onclick = async () => {
   const nome = document.getElementById("proj-nome-inp").value.trim();
   if (!nome) { toast("Digite o nome do projeto"); return; }
-  if (backupSuportado() && !_novoProjDirHandle) { toast("Selecione uma pasta de backup"); return; }
+  if (backupSuportado() && !backupCapacitorAtivo() && !_novoProjDirHandle) { toast("Selecione uma pasta de backup"); return; }
   const desc = document.getElementById("proj-desc-inp").value.trim();
   const id = await storePut("projetos", {nome, descricao:desc, animais:[]});
   if (_novoProjDirHandle) await salvarConfig("backupDirHandle_" + id, _novoProjDirHandle);
@@ -1335,7 +1337,7 @@ async function editarProjeto(id) {
   document.getElementById("edit-proj-status-toggle").classList.toggle("on", !p.desabilitado);
   const pastaRow = document.getElementById("edit-proj-pasta-row");
   const pastaBtn = document.getElementById("edit-proj-pasta-btn");
-  if (backupSuportado()) {
+  if (backupSuportado() && !backupCapacitorAtivo()) {
     pastaRow.classList.add("vis");
     const handleAtual = await lerConfig("backupDirHandle_" + id);
     pastaBtn.textContent = handleAtual ? "📁 " + handleAtual.name + " (alterar...)" : "📁 Não configurado — clique para selecionar";
@@ -1446,6 +1448,7 @@ function voltarParaProjetos() {
   backupDirHandle = null;
   document.getElementById("projetoNome").textContent = "";
   document.getElementById("projetoNome").classList.remove("vis");
+  document.getElementById("backup-nativo-info").style.display = "none";
   irPara("projetos");
 }
 
@@ -1467,6 +1470,8 @@ async function entrarProjeto(id) {
   await recarregarContadores();
   garantirTick(); atualizarEstadoTimers();
   ativarBackupProjeto(id);
+  garantirPermissaoStorage().catch(()=>{});
+  document.getElementById("backup-nativo-info").style.display = backupCapacitorAtivo() ? "" : "none";
   irPara("home");
 }
 
@@ -2628,7 +2633,7 @@ function irPara(tab){
   document.body.className="";
   document.body.classList.add("em-"+tab);
   if(tab==="projetos")renderProjetos();
-  if(tab==="lista"){renderFiltro();renderLista();}
+  if(tab==="lista"){renderFiltro();renderLista();document.getElementById("btnShareCSV").style.display=backupCapacitorAtivo()?"":"none";}
   if(tab==="resumo")renderResumo();
   if(tab==="cfg"){renderAnimaisCfg();renderGruposCfg();renderCompsCfg();atualizarBadgesCfg();}
   if(tab==="identidade")mostrarIdentidade();
@@ -2649,6 +2654,7 @@ document.getElementById("hamInicio").onclick=()=>{fecharHam();irPara("home");};
 document.getElementById("hamProjetos").onclick=()=>{fecharHam();voltarParaProjetos();};
 document.getElementById("expXlsx").onclick=exportarXLSX;
 document.getElementById("expCsv").onclick=exportarCSV;
+document.getElementById("btnShareCSV").onclick=compartilharCSVNativo;
 document.getElementById("expAudios").onclick=baixarAudios;
 document.getElementById("limpar").onclick=()=>confirmar(
   "Apagar TODOS os registros deste projeto? Esta ação não pode ser desfeita.",
@@ -2673,7 +2679,8 @@ document.getElementById("limpar").onclick=()=>confirmar(
 })();
 
 /* ─── BACKUP CSV AUTOMÁTICO ─────────────────────────────────── */
-function backupSuportado() { return 'showDirectoryPicker' in window; }
+function backupSuportado() { return 'showDirectoryPicker' in window && !backupCapacitorAtivo(); }
+function backupCapacitorAtivo() { return isNativeApp(); }
 
 function nomeFichaBackup(nomeProj) {
   return "etograma_backup_" + nomeSeguro(nomeProj || projetoAtivo?.nome || "sem-projeto") + ".csv";
@@ -2716,9 +2723,59 @@ async function appendToBackupCSV(r) {
   }
 }
 
+const CAB_CSV = ["Observador","Projeto","Animal","Animal_alvo","Comportamento_mestre","Comportamento_derivado",
+                 "Data","Hora_inicio","Hora_fim","Duracao_seg","DataHora_ISO","Tipo","Tem_audio"].join(";");
+
+async function appendToBackupCSVNativo(r) {
+  if (!backupCapacitorAtivo() || !projetoAtivo) return;
+  const FS = window.Capacitor.registerPlugin('Filesystem');
+  const path = nomeFichaBackup();
+  try {
+    let vazio = true;
+    try { const s = await FS.stat({ path, directory: 'DOCUMENTS' }); vazio = !s || s.size === 0; } catch { vazio = true; }
+    const linha = gerarLinhaCsvBackup(r);
+    if (vazio) {
+      await FS.writeFile({ path, data: "﻿" + CAB_CSV + "\n" + linha + "\n", directory: 'DOCUMENTS', encoding: 'utf8' });
+    } else {
+      await FS.appendFile({ path, data: linha + "\n", directory: 'DOCUMENTS', encoding: 'utf8' });
+    }
+    await salvarConfig("ultima_exportacao_ts_" + projetoAtivo.id, r.timestamp || Date.now());
+  } catch (e) {
+    const msg = String(e && e.message || e).toLowerCase();
+    if (msg.includes('permission') || msg.includes('denied') || msg.includes('ermiss')) {
+      toast("⚠️ Sem permissão para backup. Verifique as configurações do app.");
+    } else {
+      toast("⚠️ Falha no backup automático.");
+    }
+  }
+}
+
+async function garantirPermissaoStorage() {
+  if (!backupCapacitorAtivo()) return;
+  try {
+    const FS = window.Capacitor.registerPlugin('Filesystem');
+    const perm = await FS.checkPermissions();
+    if (perm && perm.publicStorage !== 'granted') {
+      await FS.requestPermissions();
+    }
+  } catch { /* graceful degradation — permissão não crítica no Android 10+ */ }
+}
+
+async function compartilharCSVNativo() {
+  if (!backupCapacitorAtivo() || !projetoAtivo) return;
+  const FS = window.Capacitor.registerPlugin('Filesystem');
+  const SH = window.Capacitor.registerPlugin('Share');
+  const path = nomeFichaBackup();
+  try {
+    const r = await FS.getUri({ path, directory: 'DOCUMENTS' });
+    await SH.share({ title: path, url: r.uri });
+  } catch { toast("Não foi possível compartilhar o CSV."); }
+}
+
 async function ativarBackupProjeto(projetoId) {
   backupAtivo = false;
   backupDirHandle = null;
+  if (backupCapacitorAtivo()) return;
   if (!backupSuportado()) return;
   try {
     const handle = await lerConfig("backupDirHandle_" + projetoId);
