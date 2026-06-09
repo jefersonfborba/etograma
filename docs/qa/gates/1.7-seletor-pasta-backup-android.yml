@@ -1,0 +1,16 @@
+schema: 1
+story: '1.7'
+gate: PASS
+status_reason: 'Todos os 10 ACs implementados e verificados. Sanitização de path via nomeSeguro() aplicada na origem e no uso. Retrocompatibilidade com Story 1.6 mantida (padrão Documents sem subpasta quando sem config).'
+reviewer: 'Quinn'
+updated: '2026-06-09T00:00:00Z'
+top_issues:
+  - id: 'MNT-001'
+    severity: low
+    finding: 'window.Capacitor.registerPlugin() chamado por invocação em appendToBackupCSVNativo e compartilharCSVNativo (mesmo padrão de Story 1.6)'
+    suggested_action: 'Mover para módulo singleton em refatoração futura — sem impacto funcional'
+  - id: 'DOC-001'
+    severity: low
+    finding: 'Task 8 documenta ../etc → __etc mas o resultado correto é ___etc (3 chars substituídos: . . /)'
+    suggested_action: 'Atualizar comentário no task 8 — a proteção funciona corretamente, apenas o exemplo está impreciso'
+waiver: { active: false }

@@ -561,6 +561,20 @@ table.tab .cel-t{color:var(--bg-duration);font-size:var(--fs-2xs);font-weight:va
 .modal-label{font-size:var(--fs-2xs);font-weight:var(--fw-bold);letter-spacing:.5px;
   text-transform:uppercase;color:var(--text-secondary);margin-bottom:var(--sp-1);display:block;}
 
+/* ── backup pasta ── */
+.backup-pasta-row{display:none;align-items:flex-start;flex-direction:column;gap:var(--sp-2);margin-bottom:var(--sp-4);}
+.backup-pasta-row.vis{display:flex;}
+.backup-pasta-row .modal-label{margin-bottom:0;}
+.backup-pasta-btn{width:100%;border:1.5px dashed var(--border-default);border-radius:var(--r-sm);
+  padding:var(--sp-3) var(--sp-4);font-size:var(--fs-sm);font-weight:var(--fw-semibold);
+  color:var(--text-secondary);background:var(--bg-page);cursor:pointer;text-align:left;
+  font-family:var(--font-primary);}
+.backup-pasta-btn.selecionado{border-style:solid;border-color:var(--bg-primary);color:var(--text-primary);}
+/* ── modal guard exclusão ── */
+#modal-guard-excluir .modal-btns{flex-direction:column;gap:var(--sp-3);}
+#modal-guard-excluir .btn-exportar{background:var(--bg-accent);color:#fff;}
+#modal-guard-excluir .btn-so-excluir{background:var(--bg-danger);color:#fff;}
+
 /* TOAST */
 #toast{position:fixed;left:50%;bottom:120px;transform:translateX(-50%) translateY(20px);
   background:var(--bg-toast);color:#fff;padding:var(--sp-4) var(--sp-8);border-radius:var(--r-pill);
@@ -628,6 +642,7 @@ table.tab .cel-t{color:var(--bg-duration);font-size:var(--fs-2xs);font-weight:va
     <button class="home-card" data-tab="resumo"><span class="home-ico">📊</span><span class="home-lbl">Resumo</span></button>
     <button class="home-card" data-tab="cfg"><span class="home-ico">⚙️</span><span class="home-lbl">Cadastros</span></button>
   </div>
+  <div id="backup-nativo-info" style="display:none;font-size:0.75rem;color:var(--text-muted,#888);text-align:center;padding:var(--sp-2,8px) 0 0">💾 Backup automático: Documents</div>
 </section>
 
 <!-- REGISTRAR -->
@@ -641,6 +656,7 @@ table.tab .cel-t{color:var(--bg-duration);font-size:var(--fs-2xs);font-weight:va
   <div class="acoes-export">
     <button id="expXlsx">📊 Excel</button>
     <button id="expCsv">⬇️ CSV</button>
+    <button id="btnShareCSV" style="display:none">📤 Compartilhar CSV</button>
     <button id="expAudios" class="alt">🎧 Áudios</button>
     <button id="limpar" class="perigo">🗑️ Limpar</button>
   </div>
@@ -714,6 +730,32 @@ table.tab .cel-t{color:var(--bg-duration);font-size:var(--fs-2xs);font-weight:va
   </div>
   <input type="file" id="fileComps" accept=".csv,.json,text/csv,application/json" hidden>
   <input type="file" id="fileGrupos" accept=".csv,.json,text/csv,application/json" hidden>
+
+  <div class="sec-card" id="sec-backup-nativo" style="display:none">
+    <div class="sec-header">
+      <div class="sec-title-group">
+        <span class="sec-title">💾 Backup Android</span>
+      </div>
+    </div>
+    <div class="sec-body">
+      <p class="dica">Pasta onde os arquivos CSV de backup serão salvos no dispositivo.</p>
+      <div style="display:flex;flex-direction:column;gap:var(--sp-3,12px);margin-top:var(--sp-2,8px)">
+        <div>
+          <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:4px">Diretório raiz</label>
+          <select id="backupNativoDir" style="width:100%;padding:6px 8px;border:1px solid var(--border,#ddd);border-radius:6px;background:var(--bg,#fff);font-size:0.9rem">
+            <option value="DOCUMENTS">Documents</option>
+            <option value="DOWNLOADS">Downloads</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:4px">Subpasta (opcional)</label>
+          <input id="backupNativoSubpasta" type="text" placeholder="ex: pesquisa-2026" maxlength="30"
+            style="width:100%;padding:6px 8px;border:1px solid var(--border,#ddd);border-radius:6px;background:var(--bg,#fff);font-size:0.9rem;box-sizing:border-box">
+        </div>
+        <button id="btnSalvarConfigBackup" style="align-self:flex-start;padding:6px 16px;border-radius:6px;background:var(--accent,#2563eb);color:#fff;border:none;font-size:0.9rem;cursor:pointer">Salvar</button>
+      </div>
+    </div>
+  </div>
 
 </section>
 </main>
@@ -845,6 +887,10 @@ table.tab .cel-t{color:var(--bg-duration);font-size:var(--fs-2xs);font-weight:va
     <input id="proj-nome-inp" class="modal-input" type="text" maxlength="60" placeholder="Ex: Pasto Norte — 2026">
     <label class="modal-label">Descrição (opcional)</label>
     <input id="proj-desc-inp" class="modal-input" type="text" maxlength="120" placeholder="Observações, local, turno...">
+    <div class="backup-pasta-row" id="novo-proj-pasta-row">
+      <label class="modal-label">Pasta de backup <span style="color:var(--bg-danger)">*</span></label>
+      <button type="button" class="backup-pasta-btn" id="novo-proj-pasta-btn">📁 Selecionar pasta...</button>
+    </div>
     <div class="modal-btns">
       <button class="btn-cancel" id="modal-proj-cancel">Cancelar</button>
       <button class="btn-ok" id="modal-proj-ok" style="background:var(--bg-primary)">Criar</button>
@@ -879,6 +925,10 @@ table.tab .cel-t{color:var(--bg-duration);font-size:var(--fs-2xs);font-weight:va
       </div>
       <div class="toggle-pill" id="edit-proj-status-toggle"></div>
     </div>
+    <div class="backup-pasta-row" id="edit-proj-pasta-row">
+      <label class="modal-label">Pasta de backup</label>
+      <button type="button" class="backup-pasta-btn" id="edit-proj-pasta-btn">📁 Alterar pasta...</button>
+    </div>
     <div class="modal-btns" style="flex-direction:column;gap:var(--sp-2)">
       <button class="btn-ok" id="edit-proj-salvar" style="background:var(--bg-primary)">Salvar alterações</button>
       <button class="btn-ok" id="edit-proj-excluir" style="background:var(--bg-danger)">🗑️ Excluir projeto</button>
@@ -894,6 +944,32 @@ table.tab .cel-t{color:var(--bg-duration);font-size:var(--fs-2xs);font-weight:va
     <div class="modal-btns">
       <button class="btn-cancel" id="modal-cancel">Cancelar</button>
       <button class="btn-ok" id="modal-ok">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL guard exclusão projeto -->
+<div id="modal-guard-excluir" class="modal-overlay" hidden>
+  <div class="modal-box modal-box-sm">
+    <p id="guard-msg"></p>
+    <div class="modal-btns">
+      <button class="btn-exportar" id="guard-exportar-excluir">⬇️ Exportar CSV e excluir</button>
+      <button class="btn-so-excluir" id="guard-so-excluir">🗑️ Excluir sem exportar</button>
+      <button class="btn-cancel" id="guard-cancelar">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL migração backup -->
+<div id="modal-backup-migracao" class="modal-overlay" hidden>
+  <div class="modal-box">
+    <p>Backup automático</p>
+    <p style="font-size:var(--fs-xs);color:var(--text-secondary);margin-bottom:var(--sp-4);font-weight:normal;text-align:left;line-height:var(--lh-base);">
+      Este projeto não tem uma pasta de backup configurada. Selecione uma pasta para salvar os registros automaticamente em CSV a cada registro.
+    </p>
+    <div class="modal-btns" style="flex-direction:column;gap:var(--sp-2)">
+      <button class="btn-ok" id="migracao-selecionar" style="background:var(--bg-primary)">📁 Selecionar pasta de backup</button>
+      <button class="btn-cancel" id="migracao-pular">Pular por agora</button>
     </div>
   </div>
 </div>
@@ -928,7 +1004,7 @@ table.tab .cel-t{color:var(--bg-duration);font-size:var(--fs-2xs);font-weight:va
 </div>
 
 <script>
-const APP_VERSION = '1.0.3';
+const APP_VERSION = '1.0.6';
 document.getElementById("idVersion").textContent = `v${APP_VERSION}`;
 
 /* ============================================================
@@ -1044,7 +1120,11 @@ function storePut(store, obj) {
 function storeDel(store, id) {
   return new Promise((res,rej)=>{ const q=tx(store,"readwrite").delete(id); q.onsuccess=res; q.onerror=rej; });
 }
-function addRegistro(r)    { return new Promise((res,rej)=>{ const q=tx("registros","readwrite").add(r); q.onsuccess=()=>res(q.result); q.onerror=rej; }); }
+/* ── backup CSV ── */
+let backupDirHandle = null;
+let backupAtivo = false;
+
+function addRegistro(r)    { return new Promise((res,rej)=>{ const q=tx("registros","readwrite").add(r); q.onsuccess=()=>{ appendToBackupCSV(r).catch(()=>{}); appendToBackupCSVNativo(r).catch(()=>{}); res(q.result); }; q.onerror=rej; }); }
 function delRegistro(id)   { return storeDel("registros", id); }
 async function todosRegistros() {
   const all = await storeGetAll("registros");
@@ -1227,20 +1307,43 @@ async function renderProjetos() {
   });
 }
 
+let _novoProjDirHandle = null;
 document.getElementById("btnNovoProjeto").onclick = () => {
+  _novoProjDirHandle = null;
   document.getElementById("proj-nome-inp").value = "";
   document.getElementById("proj-desc-inp").value = "";
+  const pastaRow = document.getElementById("novo-proj-pasta-row");
+  const pastaBtn = document.getElementById("novo-proj-pasta-btn");
+  if (backupSuportado() && !backupCapacitorAtivo()) {
+    pastaRow.classList.add("vis");
+    pastaBtn.textContent = "📁 Selecionar pasta...";
+    pastaBtn.classList.remove("selecionado");
+  } else {
+    pastaRow.classList.remove("vis");
+  }
   document.getElementById("modal-novo-proj").hidden = false;
   setTimeout(()=>document.getElementById("proj-nome-inp").focus(), 100);
 };
+document.getElementById("novo-proj-pasta-btn").onclick = async () => {
+  try {
+    _novoProjDirHandle = await window.showDirectoryPicker({ mode: "readwrite", startIn: "documents" });
+    const btn = document.getElementById("novo-proj-pasta-btn");
+    btn.textContent = "📁 " + _novoProjDirHandle.name;
+    btn.classList.add("selecionado");
+  } catch(e) { if (e.name !== "AbortError") toast("Não foi possível selecionar a pasta."); }
+};
 document.getElementById("modal-proj-cancel").onclick = () => {
+  _novoProjDirHandle = null;
   document.getElementById("modal-novo-proj").hidden = true;
 };
 document.getElementById("modal-proj-ok").onclick = async () => {
   const nome = document.getElementById("proj-nome-inp").value.trim();
   if (!nome) { toast("Digite o nome do projeto"); return; }
+  if (backupSuportado() && !backupCapacitorAtivo() && !_novoProjDirHandle) { toast("Selecione uma pasta de backup"); return; }
   const desc = document.getElementById("proj-desc-inp").value.trim();
   const id = await storePut("projetos", {nome, descricao:desc, animais:[]});
+  if (_novoProjDirHandle) await salvarConfig("backupDirHandle_" + id, _novoProjDirHandle);
+  _novoProjDirHandle = null;
   projetos = await storeGetAll("projetos");
   document.getElementById("modal-novo-proj").hidden = true;
   renderProjetos();
@@ -1249,20 +1352,41 @@ document.getElementById("modal-proj-ok").onclick = async () => {
 };
 /* ─── EDITAR PROJETO ────────────────────────────────────────── */
 let _editProjId = null;
-function editarProjeto(id) {
+let _editProjNovoDirHandle = null;
+async function editarProjeto(id) {
   _editProjId = id;
+  _editProjNovoDirHandle = null;
   const p = projetos.find(x=>x.id===id);
   if (!p) return;
   document.getElementById("edit-proj-nome").value = p.nome;
   document.getElementById("edit-proj-desc").value = p.descricao || "";
   document.getElementById("edit-proj-status-toggle").classList.toggle("on", !p.desabilitado);
+  const pastaRow = document.getElementById("edit-proj-pasta-row");
+  const pastaBtn = document.getElementById("edit-proj-pasta-btn");
+  if (backupSuportado() && !backupCapacitorAtivo()) {
+    pastaRow.classList.add("vis");
+    const handleAtual = await lerConfig("backupDirHandle_" + id);
+    pastaBtn.textContent = handleAtual ? "📁 " + handleAtual.name + " (alterar...)" : "📁 Não configurado — clique para selecionar";
+    pastaBtn.classList.toggle("selecionado", !!handleAtual);
+  } else {
+    pastaRow.classList.remove("vis");
+  }
   document.getElementById("modal-editar-proj").hidden = false;
   setTimeout(()=>document.getElementById("edit-proj-nome").focus(), 100);
 }
 function editProjToggleStatus() {
   document.getElementById("edit-proj-status-toggle").classList.toggle("on");
 }
+document.getElementById("edit-proj-pasta-btn").onclick = async () => {
+  try {
+    _editProjNovoDirHandle = await window.showDirectoryPicker({ mode: "readwrite", startIn: "documents" });
+    const btn = document.getElementById("edit-proj-pasta-btn");
+    btn.textContent = "📁 " + _editProjNovoDirHandle.name + " (alterar...)";
+    btn.classList.add("selecionado");
+  } catch(e) { if (e.name !== "AbortError") toast("Não foi possível selecionar a pasta."); }
+};
 document.getElementById("edit-proj-cancel").onclick = () => {
+  _editProjNovoDirHandle = null;
   document.getElementById("modal-editar-proj").hidden = true;
 };
 document.getElementById("edit-proj-salvar").onclick = async () => {
@@ -1274,29 +1398,83 @@ document.getElementById("edit-proj-salvar").onclick = async () => {
   if (!p) return;
   p.nome = nome; p.descricao = desc; p.desabilitado = !ativo;
   await storePut("projetos", p);
+  if (_editProjNovoDirHandle) {
+    const regs = (await storeGetAll("registros")).filter(r => r.projeto_id === _editProjId);
+    if (regs.length > 0) await exportarCSVParaNovaPasta(_editProjId, _editProjNovoDirHandle, p.nome);
+    await salvarConfig("backupDirHandle_" + _editProjId, _editProjNovoDirHandle);
+    if (projetoAtivo && projetoAtivo.id === _editProjId) {
+      backupDirHandle = _editProjNovoDirHandle;
+      backupAtivo = true;
+    }
+    _editProjNovoDirHandle = null;
+  }
   projetos = await storeGetAll("projetos");
   document.getElementById("modal-editar-proj").hidden = true;
   renderProjetos();
   toast("✅ Projeto atualizado");
 };
-document.getElementById("edit-proj-excluir").onclick = () => {
+document.getElementById("edit-proj-excluir").onclick = async () => {
   const p = projetos.find(x=>x.id===_editProjId);
   if (!p) return;
-  confirmar("Excluir projeto '"+p.nome+"'? Todos os registros serão apagados.", async () => {
-    document.getElementById("modal-editar-proj").hidden = true;
-    const all = await storeGetAll("registros");
-    for (const r of all.filter(r=>r.projeto_id===_editProjId)) await storeDel("registros", r.id);
-    await storeDel("projetos", _editProjId);
-    projetos = await storeGetAll("projetos");
-    renderProjetos();
-    toast("Projeto excluído");
+  const all = await storeGetAll("registros");
+  const regsProj = all.filter(r=>r.projeto_id===_editProjId);
+  const ultimaExp = await lerConfig("ultima_exportacao_ts_"+_editProjId) || 0;
+  const maxTs = regsProj.length ? Math.max(...regsProj.map(r=>r.timestamp||0)) : 0;
+  const temNaoExportados = regsProj.length > 0 && maxTs > ultimaExp;
+  if (temNaoExportados) {
+    mostrarGuardExclusao(p, regsProj);
+  } else {
+    confirmar("Excluir projeto '"+p.nome+"'? Todos os registros serão apagados.", async () => {
+      await executarExclusaoProjeto(_editProjId);
+    });
+  }
+};
+
+let _guardProj = null, _guardRegs = null;
+function mostrarGuardExclusao(p, regs) {
+  _guardProj = p; _guardRegs = regs;
+  document.getElementById("guard-msg").textContent =
+    "O projeto '" + p.nome + "' tem " + regs.length + " registro(s) não exportado(s). O que deseja fazer?";
+  document.getElementById("modal-editar-proj").hidden = true;
+  document.getElementById("modal-guard-excluir").hidden = false;
+}
+document.getElementById("guard-cancelar").onclick = () => {
+  document.getElementById("modal-guard-excluir").hidden = true;
+  _guardProj = null; _guardRegs = null;
+};
+document.getElementById("guard-exportar-excluir").onclick = async () => {
+  if (!_guardProj) return;
+  document.getElementById("modal-guard-excluir").hidden = true;
+  await exportarCSVProjetoLocal(_guardProj, _guardRegs);
+  await executarExclusaoProjeto(_guardProj.id);
+};
+document.getElementById("guard-so-excluir").onclick = async () => {
+  if (!_guardProj) return;
+  confirmar("Excluir sem exportar? Esta ação não pode ser desfeita.", async () => {
+    document.getElementById("modal-guard-excluir").hidden = true;
+    await executarExclusaoProjeto(_guardProj.id);
   });
 };
 
+async function executarExclusaoProjeto(id) {
+  document.getElementById("modal-editar-proj").hidden = true;
+  const all = await storeGetAll("registros");
+  for (const r of all.filter(r=>r.projeto_id===id)) await storeDel("registros", r.id);
+  await storeDel("projetos", id);
+  projetos = await storeGetAll("projetos");
+  if (projetoAtivo && projetoAtivo.id === id) voltarParaProjetos();
+  renderProjetos();
+  _guardProj = null; _guardRegs = null;
+  toast("Projeto excluído");
+}
+
 function voltarParaProjetos() {
   projetoAtivo = null;
+  backupAtivo = false;
+  backupDirHandle = null;
   document.getElementById("projetoNome").textContent = "";
   document.getElementById("projetoNome").classList.remove("vis");
+  document.getElementById("backup-nativo-info").style.display = "none";
   irPara("projetos");
 }
 
@@ -1317,6 +1495,19 @@ async function entrarProjeto(id) {
   renderAnimaisBar();
   await recarregarContadores();
   garantirTick(); atualizarEstadoTimers();
+  ativarBackupProjeto(id);
+  garantirPermissaoStorage().catch(()=>{});
+  if (backupCapacitorAtivo()) {
+    lerConfigBackupNativo().then(cfg => {
+      const dirLabel = cfg.dir === 'DOWNLOADS' ? 'Downloads' : 'Documents';
+      const label = cfg.subpasta ? `${dirLabel}/${cfg.subpasta}` : dirLabel;
+      const el = document.getElementById("backup-nativo-info");
+      el.textContent = `💾 ${label}`;
+      el.style.display = "";
+    }).catch(()=>{});
+  } else {
+    document.getElementById("backup-nativo-info").style.display = "none";
+  }
   irPara("home");
 }
 
@@ -2478,9 +2669,12 @@ function irPara(tab){
   document.body.className="";
   document.body.classList.add("em-"+tab);
   if(tab==="projetos")renderProjetos();
-  if(tab==="lista"){renderFiltro();renderLista();}
+  if(tab==="lista"){renderFiltro();renderLista();document.getElementById("btnShareCSV").style.display=backupCapacitorAtivo()?"":"none";}
   if(tab==="resumo")renderResumo();
-  if(tab==="cfg"){renderAnimaisCfg();renderGruposCfg();renderCompsCfg();atualizarBadgesCfg();}
+  if(tab==="cfg"){renderAnimaisCfg();renderGruposCfg();renderCompsCfg();atualizarBadgesCfg();
+    const secBk=document.getElementById("sec-backup-nativo");
+    if(backupCapacitorAtivo()){secBk.style.display="";lerConfigBackupNativo().then(cfg=>{document.getElementById("backupNativoDir").value=cfg.dir;document.getElementById("backupNativoSubpasta").value=cfg.subpasta;}).catch(()=>{});}else{secBk.style.display="none";}
+  }
   if(tab==="identidade")mostrarIdentidade();
 }
 document.querySelectorAll(".home-card").forEach(b=>b.onclick=()=>irPara(b.dataset.tab));
@@ -2499,6 +2693,17 @@ document.getElementById("hamInicio").onclick=()=>{fecharHam();irPara("home");};
 document.getElementById("hamProjetos").onclick=()=>{fecharHam();voltarParaProjetos();};
 document.getElementById("expXlsx").onclick=exportarXLSX;
 document.getElementById("expCsv").onclick=exportarCSV;
+document.getElementById("btnShareCSV").onclick=compartilharCSVNativo;
+document.getElementById("btnSalvarConfigBackup").onclick=async()=>{
+  const dir=document.getElementById("backupNativoDir").value;
+  const sub=document.getElementById("backupNativoSubpasta").value.trim();
+  await salvarConfigBackupNativo(dir,sub);
+  const dirLabel=dir==='DOWNLOADS'?'Downloads':'Documents';
+  const subSeg=nomeSeguro(sub);
+  const label=subSeg?`${dirLabel}/${subSeg}`:dirLabel;
+  document.getElementById("backup-nativo-info").textContent=`💾 ${label}`;
+  toast("✅ Configuração de backup salva!");
+};
 document.getElementById("expAudios").onclick=baixarAudios;
 document.getElementById("limpar").onclick=()=>confirmar(
   "Apagar TODOS os registros deste projeto? Esta ação não pode ser desfeita.",
@@ -2521,6 +2726,192 @@ document.getElementById("limpar").onclick=()=>confirmar(
     bar.scrollLeft = scrollLeft-(e.pageX-bar.offsetLeft-startX)*1.5;
   });
 })();
+
+/* ─── BACKUP CSV AUTOMÁTICO ─────────────────────────────────── */
+function backupSuportado() { return 'showDirectoryPicker' in window && !backupCapacitorAtivo(); }
+function backupCapacitorAtivo() { return isNativeApp(); }
+
+function nomeFichaBackup(nomeProj) {
+  return "etograma_backup_" + nomeSeguro(nomeProj || projetoAtivo?.nome || "sem-projeto") + ".csv";
+}
+
+function gerarLinhaCsvBackup(r) {
+  const sep = ";";
+  const nA  = nomeAnimal(r.animal_id) || r.animal || "";
+  const nAv = nomeAnimal(r.animal_alvo_id) || r.animal_alvo || "";
+  const compObj = comportamentos.find(x => x.nome === r.comportamento);
+  const isDer   = compObj && compObj.mestre_id;
+  const cMestre = isDer ? (comportamentos.find(x => x.id === compObj.mestre_id) || {}).nome || r.comportamento : r.comportamento;
+  const cDer    = isDer ? r.comportamento : "";
+  return [r.observador||"", projetoAtivo?.nome||"", nA, nAv, cMestre, cDer,
+          r.data, r.hora, r.hora_fim||"", r.duracao_seg||"", r.iso, r.tipo, r.tipo==="audio"?"sim":"nao"]
+    .map(c => `"${String(c).replace(/"/g,'""')}"`).join(sep);
+}
+
+async function appendToBackupCSV(r) {
+  if (!backupAtivo || !backupDirHandle) return;
+  try {
+    const cab = ["Observador","Projeto","Animal","Animal_alvo","Comportamento_mestre","Comportamento_derivado",
+                 "Data","Hora_inicio","Hora_fim","Duracao_seg","DataHora_ISO","Tipo","Tem_audio"].join(";");
+    const fileHandle = await backupDirHandle.getFileHandle(nomeFichaBackup(), { create: true });
+    const file       = await fileHandle.getFile();
+    const vazio      = file.size === 0;
+    const writable   = await fileHandle.createWritable({ keepExistingData: true });
+    await writable.seek(file.size);
+    const conteudo = vazio
+      ? "﻿" + cab + "\n" + gerarLinhaCsvBackup(r) + "\n"
+      : gerarLinhaCsvBackup(r) + "\n";
+    await writable.write(conteudo);
+    await writable.close();
+    await salvarConfig("ultima_exportacao_ts_" + projetoAtivo.id, r.timestamp || Date.now());
+  } catch (e) {
+    if (e.name === "NotAllowedError" || e.name === "SecurityError") {
+      backupAtivo = false;
+      toast("⚠️ Backup perdeu permissão. Edite o projeto para reativar.");
+    }
+  }
+}
+
+const CAB_CSV = ["Observador","Projeto","Animal","Animal_alvo","Comportamento_mestre","Comportamento_derivado",
+                 "Data","Hora_inicio","Hora_fim","Duracao_seg","DataHora_ISO","Tipo","Tem_audio"].join(";");
+
+async function appendToBackupCSVNativo(r) {
+  if (!backupCapacitorAtivo() || !projetoAtivo) return;
+  const FS = window.Capacitor.registerPlugin('Filesystem');
+  const { path, directory, mkdirPath } = await resolverPathBackupNativo();
+  try {
+    if (mkdirPath) await FS.mkdir({ path: mkdirPath, directory, recursive: true }).catch(()=>{});
+    let vazio = true;
+    try { const s = await FS.stat({ path, directory }); vazio = !s || s.size === 0; } catch { vazio = true; }
+    const linha = gerarLinhaCsvBackup(r);
+    if (vazio) {
+      await FS.writeFile({ path, data: "﻿" + CAB_CSV + "\n" + linha + "\n", directory, encoding: 'utf8' });
+    } else {
+      await FS.appendFile({ path, data: linha + "\n", directory, encoding: 'utf8' });
+    }
+    await salvarConfig("ultima_exportacao_ts_" + projetoAtivo.id, r.timestamp || Date.now());
+  } catch (e) {
+    const msg = String(e && e.message || e).toLowerCase();
+    if (msg.includes('permission') || msg.includes('denied') || msg.includes('ermiss')) {
+      toast("⚠️ Sem permissão para backup. Verifique as configurações do app.");
+    } else {
+      toast("⚠️ Falha no backup automático.");
+    }
+  }
+}
+
+async function garantirPermissaoStorage() {
+  if (!backupCapacitorAtivo()) return;
+  try {
+    const FS = window.Capacitor.registerPlugin('Filesystem');
+    const perm = await FS.checkPermissions();
+    if (perm && perm.publicStorage !== 'granted') {
+      await FS.requestPermissions();
+    }
+  } catch { /* graceful degradation — permissão não crítica no Android 10+ */ }
+}
+
+async function lerConfigBackupNativo() {
+  const cfg = await lerConfig('backupDirNativo');
+  return cfg || { dir: 'DOCUMENTS', subpasta: '' };
+}
+function salvarConfigBackupNativo(dir, subpasta) {
+  return salvarConfig('backupDirNativo', { dir, subpasta: nomeSeguro(subpasta) });
+}
+async function resolverPathBackupNativo(nomeProj) {
+  const { dir, subpasta } = await lerConfigBackupNativo();
+  const sub = nomeSeguro(subpasta);
+  const nomeArq = nomeFichaBackup(nomeProj);
+  if (dir === 'DOWNLOADS') {
+    return { path: sub ? `Download/${sub}/${nomeArq}` : `Download/${nomeArq}`,
+             directory: 'EXTERNAL_STORAGE', mkdirPath: sub ? `Download/${sub}` : null };
+  }
+  return { path: sub ? `${sub}/${nomeArq}` : nomeArq, directory: 'DOCUMENTS', mkdirPath: sub || null };
+}
+
+async function compartilharCSVNativo() {
+  if (!backupCapacitorAtivo() || !projetoAtivo) return;
+  const FS = window.Capacitor.registerPlugin('Filesystem');
+  const SH = window.Capacitor.registerPlugin('Share');
+  const { path, directory } = await resolverPathBackupNativo();
+  try {
+    const r = await FS.getUri({ path, directory });
+    await SH.share({ title: nomeFichaBackup(), url: r.uri });
+  } catch { toast("Não foi possível compartilhar o CSV."); }
+}
+
+async function ativarBackupProjeto(projetoId) {
+  backupAtivo = false;
+  backupDirHandle = null;
+  if (backupCapacitorAtivo()) return;
+  if (!backupSuportado()) return;
+  try {
+    const handle = await lerConfig("backupDirHandle_" + projetoId);
+    if (!handle) {
+      document.getElementById("modal-backup-migracao").hidden = false;
+      return;
+    }
+    const perm = await handle.queryPermission({ mode: "readwrite" });
+    if (perm === "granted") {
+      backupDirHandle = handle;
+      backupAtivo = true;
+    } else {
+      const req = await handle.requestPermission({ mode: "readwrite" });
+      if (req === "granted") { backupDirHandle = handle; backupAtivo = true; }
+    }
+  } catch (_) { /* handle inválido — ignora silenciosamente */ }
+}
+
+document.getElementById("migracao-selecionar").onclick = async () => {
+  document.getElementById("modal-backup-migracao").hidden = true;
+  if (!projetoAtivo) return;
+  try {
+    const handle = await window.showDirectoryPicker({ mode: "readwrite", startIn: "documents" });
+    await salvarConfig("backupDirHandle_" + projetoAtivo.id, handle);
+    backupDirHandle = handle;
+    backupAtivo = true;
+    toast("✅ Backup automático ativado");
+  } catch(e) { if (e.name !== "AbortError") toast("Não foi possível selecionar a pasta."); }
+};
+document.getElementById("migracao-pular").onclick = () => {
+  document.getElementById("modal-backup-migracao").hidden = true;
+};
+
+async function exportarCSVParaNovaPasta(projetoId, novoDirHandle, nomeProj) {
+  try {
+    const regs = (await storeGetAll("registros")).filter(r => r.projeto_id === projetoId);
+    if (!regs.length) return;
+    const cab = ["Observador","Projeto","Animal","Animal_alvo","Comportamento_mestre","Comportamento_derivado",
+                 "Data","Hora_inicio","Hora_fim","Duracao_seg","DataHora_ISO","Tipo","Tem_audio"].join(";");
+    const _proj = projetoAtivo;
+    if (!projetoAtivo || projetoAtivo.id !== projetoId) projetoAtivo = projetos.find(p=>p.id===projetoId) || {nome: nomeProj};
+    const linhas = regs.map(gerarLinhaCsvBackup);
+    projetoAtivo = _proj;
+    const conteudo = "﻿" + cab + "\n" + linhas.join("\n") + "\n";
+    const fileHandle = await novoDirHandle.getFileHandle(nomeFichaBackup(nomeProj), { create: true });
+    const writable = await fileHandle.createWritable();
+    await writable.write(conteudo);
+    await writable.close();
+    await salvarConfig("ultima_exportacao_ts_" + projetoId, Date.now());
+    toast("✅ Backup exportado para nova pasta");
+  } catch(e) { toast("⚠️ Erro ao exportar para nova pasta: " + e.message); }
+}
+
+async function exportarCSVProjetoLocal(p, regs) {
+  const cab = ["Observador","Projeto","Animal","Animal_alvo","Comportamento_mestre","Comportamento_derivado",
+               "Data","Hora_inicio","Hora_fim","Duracao_seg","DataHora_ISO","Tipo","Tem_audio"].join(";");
+  // gerarLinhaCsvBackup usa projetoAtivo?.nome; forçar contexto para exportação de projeto não ativo
+  const _proj = projetoAtivo;
+  if (!projetoAtivo) projetoAtivo = p;
+  const linhas = regs.map(gerarLinhaCsvBackup);
+  projetoAtivo = _proj;
+  const blob = new Blob(["﻿" + cab + "\n" + linhas.join("\n") + "\n"], {type:"text/csv;charset=utf-8"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = "etograma_" + nomeSeguro(p.nome) + ".csv";
+  a.click(); URL.revokeObjectURL(url);
+  await salvarConfig("ultima_exportacao_ts_" + p.id, Date.now());
+}
 
 /* ─── INIT ───────────────────────────────────────────────────── */
 (async function init(){

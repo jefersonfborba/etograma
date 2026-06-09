@@ -731,6 +731,32 @@ table.tab .cel-t{color:var(--bg-duration);font-size:var(--fs-2xs);font-weight:va
   <input type="file" id="fileComps" accept=".csv,.json,text/csv,application/json" hidden>
   <input type="file" id="fileGrupos" accept=".csv,.json,text/csv,application/json" hidden>
 
+  <div class="sec-card" id="sec-backup-nativo" style="display:none">
+    <div class="sec-header">
+      <div class="sec-title-group">
+        <span class="sec-title">💾 Backup Android</span>
+      </div>
+    </div>
+    <div class="sec-body">
+      <p class="dica">Pasta onde os arquivos CSV de backup serão salvos no dispositivo.</p>
+      <div style="display:flex;flex-direction:column;gap:var(--sp-3,12px);margin-top:var(--sp-2,8px)">
+        <div>
+          <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:4px">Diretório raiz</label>
+          <select id="backupNativoDir" style="width:100%;padding:6px 8px;border:1px solid var(--border,#ddd);border-radius:6px;background:var(--bg,#fff);font-size:0.9rem">
+            <option value="DOCUMENTS">Documents</option>
+            <option value="DOWNLOADS">Downloads</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:4px">Subpasta (opcional)</label>
+          <input id="backupNativoSubpasta" type="text" placeholder="ex: pesquisa-2026" maxlength="30"
+            style="width:100%;padding:6px 8px;border:1px solid var(--border,#ddd);border-radius:6px;background:var(--bg,#fff);font-size:0.9rem;box-sizing:border-box">
+        </div>
+        <button id="btnSalvarConfigBackup" style="align-self:flex-start;padding:6px 16px;border-radius:6px;background:var(--accent,#2563eb);color:#fff;border:none;font-size:0.9rem;cursor:pointer">Salvar</button>
+      </div>
+    </div>
+  </div>
+
 </section>
 </main>
 
@@ -978,7 +1004,7 @@ table.tab .cel-t{color:var(--bg-duration);font-size:var(--fs-2xs);font-weight:va
 </div>
 
 <script>
-const APP_VERSION = '1.0.5';
+const APP_VERSION = '1.0.6';
 document.getElementById("idVersion").textContent = `v${APP_VERSION}`;
 
 /* ============================================================
@@ -1471,7 +1497,17 @@ async function entrarProjeto(id) {
   garantirTick(); atualizarEstadoTimers();
   ativarBackupProjeto(id);
   garantirPermissaoStorage().catch(()=>{});
-  document.getElementById("backup-nativo-info").style.display = backupCapacitorAtivo() ? "" : "none";
+  if (backupCapacitorAtivo()) {
+    lerConfigBackupNativo().then(cfg => {
+      const dirLabel = cfg.dir === 'DOWNLOADS' ? 'Downloads' : 'Documents';
+      const label = cfg.subpasta ? `${dirLabel}/${cfg.subpasta}` : dirLabel;
+      const el = document.getElementById("backup-nativo-info");
+      el.textContent = `💾 ${label}`;
+      el.style.display = "";
+    }).catch(()=>{});
+  } else {
+    document.getElementById("backup-nativo-info").style.display = "none";
+  }
   irPara("home");
 }
 
@@ -2635,7 +2671,10 @@ function irPara(tab){
   if(tab==="projetos")renderProjetos();
   if(tab==="lista"){renderFiltro();renderLista();document.getElementById("btnShareCSV").style.display=backupCapacitorAtivo()?"":"none";}
   if(tab==="resumo")renderResumo();
-  if(tab==="cfg"){renderAnimaisCfg();renderGruposCfg();renderCompsCfg();atualizarBadgesCfg();}
+  if(tab==="cfg"){renderAnimaisCfg();renderGruposCfg();renderCompsCfg();atualizarBadgesCfg();
+    const secBk=document.getElementById("sec-backup-nativo");
+    if(backupCapacitorAtivo()){secBk.style.display="";lerConfigBackupNativo().then(cfg=>{document.getElementById("backupNativoDir").value=cfg.dir;document.getElementById("backupNativoSubpasta").value=cfg.subpasta;}).catch(()=>{});}else{secBk.style.display="none";}
+  }
   if(tab==="identidade")mostrarIdentidade();
 }
 document.querySelectorAll(".home-card").forEach(b=>b.onclick=()=>irPara(b.dataset.tab));
@@ -2655,6 +2694,16 @@ document.getElementById("hamProjetos").onclick=()=>{fecharHam();voltarParaProjet
 document.getElementById("expXlsx").onclick=exportarXLSX;
 document.getElementById("expCsv").onclick=exportarCSV;
 document.getElementById("btnShareCSV").onclick=compartilharCSVNativo;
+document.getElementById("btnSalvarConfigBackup").onclick=async()=>{
+  const dir=document.getElementById("backupNativoDir").value;
+  const sub=document.getElementById("backupNativoSubpasta").value.trim();
+  await salvarConfigBackupNativo(dir,sub);
+  const dirLabel=dir==='DOWNLOADS'?'Downloads':'Documents';
+  const subSeg=nomeSeguro(sub);
+  const label=subSeg?`${dirLabel}/${subSeg}`:dirLabel;
+  document.getElementById("backup-nativo-info").textContent=`💾 ${label}`;
+  toast("✅ Configuração de backup salva!");
+};
 document.getElementById("expAudios").onclick=baixarAudios;
 document.getElementById("limpar").onclick=()=>confirmar(
   "Apagar TODOS os registros deste projeto? Esta ação não pode ser desfeita.",
@@ -2729,15 +2778,16 @@ const CAB_CSV = ["Observador","Projeto","Animal","Animal_alvo","Comportamento_me
 async function appendToBackupCSVNativo(r) {
   if (!backupCapacitorAtivo() || !projetoAtivo) return;
   const FS = window.Capacitor.registerPlugin('Filesystem');
-  const path = nomeFichaBackup();
+  const { path, directory, mkdirPath } = await resolverPathBackupNativo();
   try {
+    if (mkdirPath) await FS.mkdir({ path: mkdirPath, directory, recursive: true }).catch(()=>{});
     let vazio = true;
-    try { const s = await FS.stat({ path, directory: 'DOCUMENTS' }); vazio = !s || s.size === 0; } catch { vazio = true; }
+    try { const s = await FS.stat({ path, directory }); vazio = !s || s.size === 0; } catch { vazio = true; }
     const linha = gerarLinhaCsvBackup(r);
     if (vazio) {
-      await FS.writeFile({ path, data: "﻿" + CAB_CSV + "\n" + linha + "\n", directory: 'DOCUMENTS', encoding: 'utf8' });
+      await FS.writeFile({ path, data: "﻿" + CAB_CSV + "\n" + linha + "\n", directory, encoding: 'utf8' });
     } else {
-      await FS.appendFile({ path, data: linha + "\n", directory: 'DOCUMENTS', encoding: 'utf8' });
+      await FS.appendFile({ path, data: linha + "\n", directory, encoding: 'utf8' });
     }
     await salvarConfig("ultima_exportacao_ts_" + projetoAtivo.id, r.timestamp || Date.now());
   } catch (e) {
@@ -2761,14 +2811,32 @@ async function garantirPermissaoStorage() {
   } catch { /* graceful degradation — permissão não crítica no Android 10+ */ }
 }
 
+async function lerConfigBackupNativo() {
+  const cfg = await lerConfig('backupDirNativo');
+  return cfg || { dir: 'DOCUMENTS', subpasta: '' };
+}
+function salvarConfigBackupNativo(dir, subpasta) {
+  return salvarConfig('backupDirNativo', { dir, subpasta: nomeSeguro(subpasta) });
+}
+async function resolverPathBackupNativo(nomeProj) {
+  const { dir, subpasta } = await lerConfigBackupNativo();
+  const sub = nomeSeguro(subpasta);
+  const nomeArq = nomeFichaBackup(nomeProj);
+  if (dir === 'DOWNLOADS') {
+    return { path: sub ? `Download/${sub}/${nomeArq}` : `Download/${nomeArq}`,
+             directory: 'EXTERNAL_STORAGE', mkdirPath: sub ? `Download/${sub}` : null };
+  }
+  return { path: sub ? `${sub}/${nomeArq}` : nomeArq, directory: 'DOCUMENTS', mkdirPath: sub || null };
+}
+
 async function compartilharCSVNativo() {
   if (!backupCapacitorAtivo() || !projetoAtivo) return;
   const FS = window.Capacitor.registerPlugin('Filesystem');
   const SH = window.Capacitor.registerPlugin('Share');
-  const path = nomeFichaBackup();
+  const { path, directory } = await resolverPathBackupNativo();
   try {
-    const r = await FS.getUri({ path, directory: 'DOCUMENTS' });
-    await SH.share({ title: path, url: r.uri });
+    const r = await FS.getUri({ path, directory });
+    await SH.share({ title: nomeFichaBackup(), url: r.uri });
   } catch { toast("Não foi possível compartilhar o CSV."); }
 }
 
